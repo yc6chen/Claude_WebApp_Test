@@ -1,13 +1,63 @@
+# Python cache and compiled files
 __pycache__
 *.pyc
 *.pyo
 *.pyd
+*.pdb
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
 .Python
 env/
 venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment and configuration
 .env
+.env.*
+*.env
+.flaskenv
+
+# Version control
 .git
 .gitignore
+.gitattributes
+
+# Documentation
 README.md
+*.md
+docs/
+
+# Database files
 *.db
 *.sqlite3
+*.sqlite
+db.sqlite3
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+*.cover
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Logs
+*.log
+logs/
