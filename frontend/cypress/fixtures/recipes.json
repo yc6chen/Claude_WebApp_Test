@@ -1,0 +1,27 @@
+{
+  "sampleRecipe": {
+    "title": "Sample Recipe",
+    "ingredients": "ingredient 1, ingredient 2, ingredient 3",
+    "instructions": "Step 1. Step 2. Step 3."
+  },
+  "chocolateChipCookies": {
+    "title": "Chocolate Chip Cookies",
+    "ingredients": "2 cups flour, 1 cup butter, 1 cup sugar, 2 eggs, 2 cups chocolate chips",
+    "instructions": "1. Preheat oven to 350°F. 2. Mix dry ingredients. 3. Add wet ingredients. 4. Fold in chocolate chips. 5. Bake for 12 minutes."
+  },
+  "bananaBread": {
+    "title": "Banana Bread",
+    "ingredients": "3 ripe bananas, 2 cups flour, 1 cup sugar, 2 eggs, 1/2 cup butter",
+    "instructions": "1. Mash bananas. 2. Mix all ingredients. 3. Pour into loaf pan. 4. Bake at 350°F for 60 minutes."
+  },
+  "pastaCarbonara": {
+    "title": "Pasta Carbonara",
+    "ingredients": "1 lb pasta, 6 slices bacon, 4 eggs, 1 cup parmesan cheese, black pepper",
+    "instructions": "1. Cook pasta. 2. Fry bacon until crispy. 3. Mix eggs and cheese. 4. Combine all ingredients while pasta is hot."
+  },
+  "caesarSalad": {
+    "title": "Caesar Salad",
+    "ingredients": "1 head romaine lettuce, 1/2 cup parmesan, 1 cup croutons, Caesar dressing",
+    "instructions": "1. Chop romaine lettuce. 2. Add parmesan and croutons. 3. Toss with Caesar dressing."
+  }
+}

@@ -12,15 +12,25 @@
     "react-scripts": "5.0.1"
   },
   "devDependencies": {
+    "@testing-library/cypress": "^10.1.0",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^14.6.1"
+    "@testing-library/user-event": "^14.6.1",
+    "cypress": "^15.5.0"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "cypress:run:chrome": "cypress run --browser chrome",
+    "cypress:run:firefox": "cypress run --browser firefox",
+    "e2e": "cypress run",
+    "e2e:headed": "cypress run --headed",
+    "e2e:chrome": "cypress run --browser chrome",
+    "e2e:firefox": "cypress run --browser firefox"
   },
   "eslintConfig": {
     "extends": [
