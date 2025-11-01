@@ -10,8 +10,9 @@ import {
   Divider,
   ListSubheader,
 } from '@mui/material';
+import SearchBar from './SearchBar';
 
-const RecipeList = ({ recipes, selectedRecipe, onSelectRecipe }) => {
+const RecipeList = ({ recipes, selectedRecipe, onSelectRecipe, onSearch, onFilterChange }) => {
   // Category display names
   const categoryNames = {
     appetizers: 'Appetizers',
@@ -52,7 +53,8 @@ const RecipeList = ({ recipes, selectedRecipe, onSelectRecipe }) => {
         width: 350,
         borderRight: 1,
         borderColor: 'divider',
-        overflowY: 'auto',
+        display: 'flex',
+        flexDirection: 'column',
         backgroundColor: 'background.paper',
       }}
     >
@@ -62,7 +64,14 @@ const RecipeList = ({ recipes, selectedRecipe, onSelectRecipe }) => {
           {recipes.length} recipe{recipes.length !== 1 ? 's' : ''}
         </Typography>
       </Box>
+
+      <Box sx={{ px: 2 }}>
+        <SearchBar onSearch={onSearch} onFilterChange={onFilterChange} />
+      </Box>
+
       <Divider />
+
+      <Box sx={{ flex: 1, overflowY: 'auto' }}>
 
       {categoryOrder.map((category) => {
         const categoryRecipes = recipesByCategory[category];
@@ -134,6 +143,7 @@ const RecipeList = ({ recipes, selectedRecipe, onSelectRecipe }) => {
           </List>
         );
       })}
+      </Box>
     </Box>
   );
 };

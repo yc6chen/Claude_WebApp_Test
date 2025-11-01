@@ -312,7 +312,7 @@ class TestRecipeSerializer:
 
         expected_fields = {
             'id', 'name', 'description', 'category', 'prep_time',
-            'cook_time', 'difficulty', 'ingredients', 'created_at', 'updated_at'
+            'cook_time', 'difficulty', 'dietary_tags', 'ingredients', 'created_at', 'updated_at'
         }
         assert set(serializer.data.keys()) == expected_fields
 

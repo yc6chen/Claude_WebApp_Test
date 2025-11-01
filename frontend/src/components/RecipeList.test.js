@@ -325,11 +325,22 @@ describe('RecipeList', () => {
 
   describe('Edge Cases', () => {
     test('handles empty recipe list', () => {
-      render(<RecipeList recipes={[]} selectedRecipe={null} onSelectRecipe={mockOnSelectRecipe} />);
+      const mockOnSearch = jest.fn();
+      const mockOnFilterChange = jest.fn();
+      render(
+        <RecipeList
+          recipes={[]}
+          selectedRecipe={null}
+          onSelectRecipe={mockOnSelectRecipe}
+          onSearch={mockOnSearch}
+          onFilterChange={mockOnFilterChange}
+        />
+      );
 
       expect(screen.getByText('Recipes')).toBeInTheDocument();
       expect(screen.getByText('0 recipes')).toBeInTheDocument();
-      expect(screen.queryByRole('button')).not.toBeInTheDocument();
+      // SearchBar filter button should be present
+      expect(screen.getByRole('button')).toBeInTheDocument();
     });
 
     test('handles null selectedRecipe', () => {

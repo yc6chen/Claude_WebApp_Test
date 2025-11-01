@@ -93,6 +93,75 @@ class TestRecipeDefaults:
         # Assert
         assert recipe.description == '', "Description should allow blank values"
 
+    def test_dietary_tags_defaults_to_empty_list(self, recipe_factory):
+        """Test that dietary_tags defaults to an empty list."""
+        # Act
+        recipe = recipe_factory()
+
+        # Assert
+        assert recipe.dietary_tags == [], "Default dietary_tags should be empty list"
+
+
+class TestRecipeDietaryTags:
+    """Tests for Recipe dietary tags functionality."""
+
+    def test_create_recipe_with_single_dietary_tag(self, recipe_factory):
+        """Test creating a recipe with a single dietary tag."""
+        # Act
+        recipe = recipe_factory(dietary_tags=['vegan'])
+
+        # Assert
+        assert recipe.dietary_tags == ['vegan']
+        assert 'vegan' in recipe.dietary_tags
+
+    def test_create_recipe_with_multiple_dietary_tags(self, recipe_factory):
+        """Test creating a recipe with multiple dietary tags."""
+        # Act
+        tags = ['vegan', 'gluten_free', 'nut_free']
+        recipe = recipe_factory(dietary_tags=tags)
+
+        # Assert
+        assert recipe.dietary_tags == tags
+        assert len(recipe.dietary_tags) == 3
+        assert 'vegan' in recipe.dietary_tags
+        assert 'gluten_free' in recipe.dietary_tags
+        assert 'nut_free' in recipe.dietary_tags
+
+    def test_create_recipe_with_empty_dietary_tags(self, recipe_factory):
+        """Test creating a recipe with explicitly empty dietary tags."""
+        # Act
+        recipe = recipe_factory(dietary_tags=[])
+
+        # Assert
+        assert recipe.dietary_tags == []
+        assert len(recipe.dietary_tags) == 0
+
+    def test_update_recipe_dietary_tags(self, recipe_factory):
+        """Test updating dietary tags on an existing recipe."""
+        # Arrange
+        recipe = recipe_factory(dietary_tags=['vegan'])
+
+        # Act
+        recipe.dietary_tags = ['vegan', 'gluten_free']
+        recipe.save()
+        recipe.refresh_from_db()
+
+        # Assert
+        assert recipe.dietary_tags == ['vegan', 'gluten_free']
+
+    def test_remove_all_dietary_tags(self, recipe_factory):
+        """Test removing all dietary tags from a recipe."""
+        # Arrange
+        recipe = recipe_factory(dietary_tags=['vegan', 'keto'])
+
+        # Act
+        recipe.dietary_tags = []
+        recipe.save()
+        recipe.refresh_from_db()
+
+        # Assert
+        assert recipe.dietary_tags == []
+
 
 class TestRecipeValidation:
     """Tests for Recipe model field validation."""

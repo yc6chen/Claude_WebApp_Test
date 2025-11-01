@@ -239,3 +239,158 @@ test.describe('Recipe Application - Accessibility', () => {
     expect(focusedElement).toBeTruthy();
   });
 });
+
+test.describe('Recipe Search and Filtering Features', () => {
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('should display search bar in recipe list', async ({ page }) => {
+    const searchInput = page.getByPlaceholder(/search recipes by name/i);
+    await expect(searchInput).toBeVisible();
+  });
+
+  test('should display filter button', async ({ page }) => {
+    const filterButton = page.locator('button:has(svg)').filter({ has: page.locator('[data-testid="FilterListIcon"]') });
+    await expect(filterButton.first()).toBeVisible();
+  });
+
+  test('should show advanced filters when filter button is clicked', async ({ page }) => {
+    // Click the filter button (IconButton with FilterListIcon)
+    const filterButton = page.locator('button:has(svg)').filter({ has: page.locator('[data-testid="FilterListIcon"]') });
+    await filterButton.first().click();
+
+    // Wait for the collapse animation
+    await page.waitForTimeout(500);
+
+    // Check that advanced filters are visible
+    await expect(page.getByText(/advanced filters/i)).toBeVisible();
+  });
+
+  test('should hide advanced filters when filter button is clicked again', async ({ page }) => {
+    const filterButton = page.locator('button:has(svg)').filter({ has: page.locator('[data-testid="FilterListIcon"]') });
+    await filterButton.first().click();
+    await page.waitForTimeout(500);
+
+    await expect(page.getByText(/advanced filters/i)).toBeVisible();
+
+    await filterButton.first().click();
+    await page.waitForTimeout(500);
+
+    await expect(page.getByText(/advanced filters/i)).not.toBeVisible();
+  });
+
+  test('should display all filter options in advanced filters', async ({ page }) => {
+    const filterButton = page.locator('button:has(svg)').filter({ has: page.locator('[data-testid="FilterListIcon"]') });
+    await filterButton.first().click();
+    await page.waitForTimeout(500);
+
+    // Check for difficulty filter
+    await expect(page.getByLabel(/^difficulty$/i).first()).toBeVisible();
+
+    // Check for time filters
+    await expect(page.getByLabel(/max prep time/i)).toBeVisible();
+    await expect(page.getByLabel(/max cook time/i)).toBeVisible();
+
+    // Check for ingredient filters
+    await expect(page.getByLabel(/include ingredients/i)).toBeVisible();
+    await expect(page.getByLabel(/exclude ingredients/i)).toBeVisible();
+
+    // Check for dietary tags filter
+    await expect(page.getByLabel(/dietary tags/i).first()).toBeVisible();
+  });
+
+  test('should allow typing in search input', async ({ page }) => {
+    const searchInput = page.getByPlaceholder(/search recipes by name/i);
+    await searchInput.fill('test search');
+
+    await expect(searchInput).toHaveValue('test search');
+  });
+
+  test('should show clear button when search has text', async ({ page }) => {
+    const searchInput = page.getByPlaceholder(/search recipes by name/i);
+    await searchInput.fill('test');
+
+    // Clear button should appear (IconButton with ClearIcon)
+    const clearButton = page.locator('button:has(svg)').filter({ has: page.locator('[data-testid="ClearIcon"]') });
+    await expect(clearButton.first()).toBeVisible();
+  });
+
+  test('should clear search text when clear button is clicked', async ({ page }) => {
+    const searchInput = page.getByPlaceholder(/search recipes by name/i);
+    await searchInput.fill('test search');
+
+    const clearButton = page.locator('button:has(svg)').filter({ has: page.locator('[data-testid="ClearIcon"]') });
+    await clearButton.first().click();
+
+    await expect(searchInput).toHaveValue('');
+  });
+
+  test('should allow typing in max prep time filter', async ({ page }) => {
+    const filterButton = page.locator('button:has(svg)').filter({ has: page.locator('[data-testid="FilterListIcon"]') });
+    await filterButton.first().click();
+    await page.waitForTimeout(500);
+
+    const prepTimeInput = page.getByLabel(/max prep time/i);
+    await prepTimeInput.fill('30');
+
+    await expect(prepTimeInput).toHaveValue('30');
+  });
+
+  test('should allow typing in max cook time filter', async ({ page }) => {
+    const filterButton = page.locator('button:has(svg)').filter({ has: page.locator('[data-testid="FilterListIcon"]') });
+    await filterButton.first().click();
+    await page.waitForTimeout(500);
+
+    const cookTimeInput = page.getByLabel(/max cook time/i);
+    await cookTimeInput.fill('45');
+
+    await expect(cookTimeInput).toHaveValue('45');
+  });
+
+  test('should allow typing in include ingredients filter', async ({ page }) => {
+    const filterButton = page.locator('button:has(svg)').filter({ has: page.locator('[data-testid="FilterListIcon"]') });
+    await filterButton.first().click();
+    await page.waitForTimeout(500);
+
+    const includeInput = page.getByLabel(/include ingredients/i);
+    await includeInput.fill('chicken');
+
+    await expect(includeInput).toHaveValue('chicken');
+  });
+
+  test('should allow typing in exclude ingredients filter', async ({ page }) => {
+    const filterButton = page.locator('button:has(svg)').filter({ has: page.locator('[data-testid="FilterListIcon"]') });
+    await filterButton.first().click();
+    await page.waitForTimeout(500);
+
+    const excludeInput = page.getByLabel(/exclude ingredients/i);
+    await excludeInput.fill('mushrooms');
+
+    await expect(excludeInput).toHaveValue('mushrooms');
+  });
+
+  test('should show clear all filters button when filters are active', async ({ page }) => {
+    const filterButton = page.locator('button:has(svg)').filter({ has: page.locator('[data-testid="FilterListIcon"]') });
+    await filterButton.first().click();
+    await page.waitForTimeout(500);
+
+    const prepTimeInput = page.getByLabel(/max prep time/i);
+    await prepTimeInput.fill('30');
+
+    await expect(page.getByRole('button', { name: /clear all filters/i })).toBeVisible();
+  });
+
+  test('should display dietary tags field in add recipe modal', async ({ page }) => {
+    const addButton = page.locator('button[aria-label="add"]');
+    await addButton.click();
+
+    await expect(page.getByRole('heading', { name: 'Add New Recipe' })).toBeVisible();
+
+    // Check for dietary tags field
+    const dietaryTagsLabel = page.getByLabel(/dietary tags/i).first();
+    await expect(dietaryTagsLabel).toBeVisible();
+  });
+});
