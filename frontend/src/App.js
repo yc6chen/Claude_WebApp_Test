@@ -33,18 +33,54 @@ function App() {
   const [recipes, setRecipes] = useState([]);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const [filters, setFilters] = useState({
+    difficulty: '',
+    maxPrepTime: '',
+    maxCookTime: '',
+    includeIngredients: '',
+    excludeIngredients: '',
+    dietaryTags: [],
+  });
 
   useEffect(() => {
     fetchRecipes();
-  }, []);
+  }, [searchText, filters]);
 
   const fetchRecipes = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/recipes/');
+      const params = new URLSearchParams();
+
+      if (searchText) {
+        params.append('search', searchText);
+      }
+      if (filters.difficulty) {
+        params.append('difficulty', filters.difficulty);
+      }
+      if (filters.maxPrepTime) {
+        params.append('max_prep_time', filters.maxPrepTime);
+      }
+      if (filters.maxCookTime) {
+        params.append('max_cook_time', filters.maxCookTime);
+      }
+      if (filters.includeIngredients) {
+        params.append('include_ingredients', filters.includeIngredients);
+      }
+      if (filters.excludeIngredients) {
+        params.append('exclude_ingredients', filters.excludeIngredients);
+      }
+      if (filters.dietaryTags.length > 0) {
+        params.append('dietary_tags', filters.dietaryTags.join(','));
+      }
+
+      const url = `http://localhost:8000/api/recipes/${params.toString() ? '?' + params.toString() : ''}`;
+      const response = await fetch(url);
       const data = await response.json();
       setRecipes(data);
       if (data.length > 0 && !selectedRecipe) {
         setSelectedRecipe(data[0]);
+      } else if (data.length === 0) {
+        setSelectedRecipe(null);
       }
     } catch (error) {
       console.error('Error fetching recipes:', error);
@@ -101,6 +137,8 @@ function App() {
             recipes={recipes}
             selectedRecipe={selectedRecipe}
             onSelectRecipe={setSelectedRecipe}
+            onSearch={setSearchText}
+            onFilterChange={setFilters}
           />
           <RecipeDetail
             recipe={selectedRecipe}

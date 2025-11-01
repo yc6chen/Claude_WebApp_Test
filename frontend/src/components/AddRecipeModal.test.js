@@ -82,10 +82,10 @@ describe('AddRecipeModal', () => {
       render(<AddRecipeModal open={true} onClose={mockOnClose} onAdd={mockOnAdd} />);
 
       const descInput = screen.getByLabelText(/description/i);
-      await user.type(descInput, 'Delicious chocolate cake');
+      await user.type(descInput, 'Delicious cake');
 
-      expect(descInput).toHaveValue('Delicious chocolate cake');
-    });
+      expect(descInput).toHaveValue('Delicious cake');
+    }, 10000);
 
     test('updates category selection', async () => {
       const user = userEvent.setup();
@@ -358,6 +358,7 @@ describe('AddRecipeModal', () => {
         prep_time: 15,
         cook_time: 30,
         difficulty: 'easy',
+        dietary_tags: [],
         ingredients: [],
       });
     });

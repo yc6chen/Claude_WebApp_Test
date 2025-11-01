@@ -16,9 +16,24 @@ import {
   List,
   ListItem,
   Paper,
+  OutlinedInput,
+  Chip,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
+
+const DIETARY_TAGS = [
+  { value: 'vegan', label: 'Vegan' },
+  { value: 'vegetarian', label: 'Vegetarian' },
+  { value: 'gluten_free', label: 'Gluten-Free' },
+  { value: 'dairy_free', label: 'Dairy-Free' },
+  { value: 'nut_free', label: 'Nut-Free' },
+  { value: 'low_carb', label: 'Low-Carb' },
+  { value: 'keto', label: 'Keto' },
+  { value: 'paleo', label: 'Paleo' },
+  { value: 'halal', label: 'Halal' },
+  { value: 'kosher', label: 'Kosher' },
+];
 
 const AddRecipeModal = ({ open, onClose, onAdd }) => {
   const [formData, setFormData] = useState({
@@ -28,6 +43,7 @@ const AddRecipeModal = ({ open, onClose, onAdd }) => {
     prep_time: '',
     cook_time: '',
     difficulty: 'easy',
+    dietary_tags: [],
     ingredients: [],
   });
 
@@ -106,6 +122,7 @@ const AddRecipeModal = ({ open, onClose, onAdd }) => {
       prep_time: '',
       cook_time: '',
       difficulty: 'easy',
+      dietary_tags: [],
       ingredients: [],
     });
     setNewIngredient({ name: '', measurement: '' });
@@ -121,6 +138,7 @@ const AddRecipeModal = ({ open, onClose, onAdd }) => {
       prep_time: '',
       cook_time: '',
       difficulty: 'easy',
+      dietary_tags: [],
       ingredients: [],
     });
     setNewIngredient({ name: '', measurement: '' });
@@ -139,6 +157,7 @@ const AddRecipeModal = ({ open, onClose, onAdd }) => {
             value={formData.name}
             onChange={handleInputChange}
             required
+            inputProps={{ 'data-testid': 'recipe-name-input' }}
           />
 
           <TextField
@@ -149,6 +168,7 @@ const AddRecipeModal = ({ open, onClose, onAdd }) => {
             rows={3}
             value={formData.description}
             onChange={handleInputChange}
+            inputProps={{ 'data-testid': 'recipe-description-input' }}
           />
 
           <FormControl fullWidth>
@@ -181,7 +201,8 @@ const AddRecipeModal = ({ open, onClose, onAdd }) => {
               inputProps={{
                 min: 0,
                 step: 1,
-                pattern: '[0-9]*'
+                pattern: '[0-9]*',
+                'data-testid': 'recipe-prep-time-input'
               }}
               error={timeErrors.prep_time}
               helperText={timeErrors.prep_time ? "Only numbers are allowed" : ""}
@@ -197,7 +218,8 @@ const AddRecipeModal = ({ open, onClose, onAdd }) => {
               inputProps={{
                 min: 0,
                 step: 1,
-                pattern: '[0-9]*'
+                pattern: '[0-9]*',
+                'data-testid': 'recipe-cook-time-input'
               }}
               error={timeErrors.cook_time}
               helperText={timeErrors.cook_time ? "Only numbers are allowed" : ""}
@@ -219,6 +241,37 @@ const AddRecipeModal = ({ open, onClose, onAdd }) => {
             </Select>
           </FormControl>
 
+          <FormControl fullWidth>
+            <InputLabel>Dietary Tags</InputLabel>
+            <Select
+              multiple
+              name="dietary_tags"
+              value={formData.dietary_tags}
+              onChange={handleInputChange}
+              input={<OutlinedInput label="Dietary Tags" />}
+              renderValue={(selected) => (
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                  {selected.map((value) => {
+                    const tag = DIETARY_TAGS.find((t) => t.value === value);
+                    return (
+                      <Chip
+                        key={value}
+                        label={tag?.label || value}
+                        size="small"
+                      />
+                    );
+                  })}
+                </Box>
+              )}
+            >
+              {DIETARY_TAGS.map((tag) => (
+                <MenuItem key={tag.value} value={tag.value}>
+                  {tag.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
           <Box>
             <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
               Ingredients
@@ -233,6 +286,7 @@ const AddRecipeModal = ({ open, onClose, onAdd }) => {
                   onChange={handleIngredientChange}
                   size="small"
                   sx={{ flex: 2 }}
+                  inputProps={{ 'data-testid': 'ingredient-name-input' }}
                 />
                 <TextField
                   name="measurement"
@@ -241,6 +295,7 @@ const AddRecipeModal = ({ open, onClose, onAdd }) => {
                   onChange={handleIngredientChange}
                   size="small"
                   sx={{ flex: 1 }}
+                  inputProps={{ 'data-testid': 'ingredient-measurement-input' }}
                 />
                 <IconButton
                   color="primary"

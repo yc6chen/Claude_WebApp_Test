@@ -24,6 +24,19 @@ class Recipe(models.Model):
         ('lunch', 'Lunch'),
     ]
 
+    DIETARY_TAG_CHOICES = [
+        ('vegan', 'Vegan'),
+        ('vegetarian', 'Vegetarian'),
+        ('gluten_free', 'Gluten-Free'),
+        ('dairy_free', 'Dairy-Free'),
+        ('nut_free', 'Nut-Free'),
+        ('low_carb', 'Low-Carb'),
+        ('keto', 'Keto'),
+        ('paleo', 'Paleo'),
+        ('halal', 'Halal'),
+        ('kosher', 'Kosher'),
+    ]
+
     # Core fields with constraints
     name = models.CharField(
         max_length=200,
@@ -61,6 +74,13 @@ class Recipe(models.Model):
         default='easy',
         db_index=True,  # Index for filtering by difficulty
         help_text="Recipe difficulty level"
+    )
+
+    # Dietary tags field (multiple tags supported)
+    dietary_tags = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="List of dietary tags (e.g., vegan, gluten-free)"
     )
 
     # Timestamp fields with indexes for time-series queries

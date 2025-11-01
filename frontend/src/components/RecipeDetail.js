@@ -84,6 +84,28 @@ const RecipeDetail = ({ recipe, onDelete }) => {
           />
         </Box>
 
+        {recipe.dietary_tags && recipe.dietary_tags.length > 0 && (
+          <Card sx={{ mb: 3 }}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Dietary Information
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                {recipe.dietary_tags.map((tag) => (
+                  <Chip
+                    key={tag}
+                    label={tag.replace('_', '-').split('-').map(word =>
+                      word.charAt(0).toUpperCase() + word.slice(1)
+                    ).join('-')}
+                    color="secondary"
+                    size="small"
+                  />
+                ))}
+              </Box>
+            </CardContent>
+          </Card>
+        )}
+
         <Card sx={{ mb: 3 }}>
           <CardContent>
             <Typography variant="h6" gutterBottom>

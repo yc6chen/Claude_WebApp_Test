@@ -461,3 +461,381 @@ class TestRecipeAPIComplexScenarios:
         retrieve_response = api_client.get(f'/api/recipes/{recipe_id}/')
         assert retrieve_response.status_code == status.HTTP_200_OK
         assert retrieve_response.data['id'] == recipe_id
+
+
+# ============================================================================
+# Recipe Search and Filtering Tests
+# ============================================================================
+
+class TestRecipeSearch:
+    """Tests for recipe search functionality."""
+
+    def test_search_by_name_returns_matching_recipes(self, api_client, recipe_factory):
+        """Test searching for recipes by name."""
+        # Arrange
+        recipe_factory(name='Chocolate Cake')
+        recipe_factory(name='Vanilla Cake')
+        recipe_factory(name='Strawberry Smoothie')
+
+        # Act
+        response = api_client.get('/api/recipes/', {'search': 'Cake'})
+
+        # Assert
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 2
+        recipe_names = [r['name'] for r in response.data]
+        assert 'Chocolate Cake' in recipe_names
+        assert 'Vanilla Cake' in recipe_names
+        assert 'Strawberry Smoothie' not in recipe_names
+
+    def test_search_is_case_insensitive(self, api_client, recipe_factory):
+        """Test that search is case insensitive."""
+        # Arrange
+        recipe_factory(name='Chocolate Cake')
+
+        # Act
+        response = api_client.get('/api/recipes/', {'search': 'chocolate'})
+
+        # Assert
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 1
+        assert response.data[0]['name'] == 'Chocolate Cake'
+
+    def test_search_with_no_matches_returns_empty(self, api_client, recipe_factory):
+        """Test that search with no matches returns empty list."""
+        # Arrange
+        recipe_factory(name='Chocolate Cake')
+
+        # Act
+        response = api_client.get('/api/recipes/', {'search': 'Pizza'})
+
+        # Assert
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 0
+
+
+class TestRecipeDifficultyFilter:
+    """Tests for filtering recipes by difficulty."""
+
+    def test_filter_by_difficulty_easy(self, api_client, recipe_factory):
+        """Test filtering recipes by easy difficulty."""
+        # Arrange
+        recipe_factory(name='Easy Recipe', difficulty='easy')
+        recipe_factory(name='Hard Recipe', difficulty='hard')
+
+        # Act
+        response = api_client.get('/api/recipes/', {'difficulty': 'easy'})
+
+        # Assert
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 1
+        assert response.data[0]['difficulty'] == 'easy'
+
+    def test_filter_by_difficulty_medium(self, api_client, recipe_factory):
+        """Test filtering recipes by medium difficulty."""
+        # Arrange
+        recipe_factory(difficulty='easy')
+        recipe_factory(difficulty='medium')
+        recipe_factory(difficulty='hard')
+
+        # Act
+        response = api_client.get('/api/recipes/', {'difficulty': 'medium'})
+
+        # Assert
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 1
+        assert response.data[0]['difficulty'] == 'medium'
+
+
+class TestRecipeTimeFilters:
+    """Tests for filtering recipes by prep and cook time."""
+
+    def test_filter_by_max_prep_time(self, api_client, recipe_factory):
+        """Test filtering recipes by maximum prep time."""
+        # Arrange
+        recipe_factory(name='Quick Recipe', prep_time=10, cook_time=15)
+        recipe_factory(name='Slow Recipe', prep_time=60, cook_time=120)
+
+        # Act
+        response = api_client.get('/api/recipes/', {'max_prep_time': '30'})
+
+        # Assert
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 1
+        assert response.data[0]['name'] == 'Quick Recipe'
+
+    def test_filter_by_max_cook_time(self, api_client, recipe_factory):
+        """Test filtering recipes by maximum cook time."""
+        # Arrange
+        recipe_factory(name='Quick Recipe', prep_time=10, cook_time=15)
+        recipe_factory(name='Slow Recipe', prep_time=20, cook_time=120)
+
+        # Act
+        response = api_client.get('/api/recipes/', {'max_cook_time': '30'})
+
+        # Assert
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 1
+        assert response.data[0]['name'] == 'Quick Recipe'
+
+    def test_filter_by_both_prep_and_cook_time(self, api_client, recipe_factory):
+        """Test filtering by both prep and cook time simultaneously."""
+        # Arrange
+        recipe_factory(name='Very Quick', prep_time=5, cook_time=10)
+        recipe_factory(name='Medium Speed', prep_time=20, cook_time=25)
+        recipe_factory(name='Very Slow', prep_time=60, cook_time=120)
+
+        # Act
+        response = api_client.get('/api/recipes/', {
+            'max_prep_time': '30',
+            'max_cook_time': '30'
+        })
+
+        # Assert
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 2
+        recipe_names = [r['name'] for r in response.data]
+        assert 'Very Quick' in recipe_names
+        assert 'Medium Speed' in recipe_names
+
+
+class TestRecipeIngredientFilters:
+    """Tests for filtering recipes by ingredients."""
+
+    def test_filter_by_include_ingredient(self, api_client, recipe_with_ingredients_factory):
+        """Test filtering recipes that include a specific ingredient."""
+        # Arrange
+        recipe_with_ingredients_factory(
+            recipe_kwargs={'name': 'Chicken Soup'},
+            ingredient_kwargs_list=[
+                {'name': 'Chicken', 'measurement': '1 lb', 'order': 0},
+                {'name': 'Carrots', 'measurement': '2 cups', 'order': 1}
+            ]
+        )
+        recipe_with_ingredients_factory(
+            recipe_kwargs={'name': 'Beef Stew'},
+            ingredient_kwargs_list=[
+                {'name': 'Beef', 'measurement': '1 lb', 'order': 0},
+                {'name': 'Potatoes', 'measurement': '3 cups', 'order': 1}
+            ]
+        )
+
+        # Act
+        response = api_client.get('/api/recipes/', {'include_ingredients': 'Chicken'})
+
+        # Assert
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 1
+        assert response.data[0]['name'] == 'Chicken Soup'
+
+    def test_filter_by_exclude_ingredient(self, api_client, recipe_with_ingredients_factory):
+        """Test filtering recipes that exclude a specific ingredient."""
+        # Arrange
+        recipe_with_ingredients_factory(
+            recipe_kwargs={'name': 'Chicken with Mushrooms'},
+            ingredient_kwargs_list=[
+                {'name': 'Chicken', 'measurement': '1 lb', 'order': 0},
+                {'name': 'Mushrooms', 'measurement': '1 cup', 'order': 1}
+            ]
+        )
+        recipe_with_ingredients_factory(
+            recipe_kwargs={'name': 'Plain Chicken'},
+            ingredient_kwargs_list=[
+                {'name': 'Chicken', 'measurement': '1 lb', 'order': 0},
+                {'name': 'Herbs', 'measurement': '1 tsp', 'order': 1}
+            ]
+        )
+
+        # Act
+        response = api_client.get('/api/recipes/', {'exclude_ingredients': 'Mushrooms'})
+
+        # Assert
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 1
+        assert response.data[0]['name'] == 'Plain Chicken'
+
+    def test_filter_by_include_and_exclude_ingredients(self, api_client, recipe_with_ingredients_factory):
+        """Test filtering with both include and exclude ingredient filters."""
+        # Arrange
+        recipe_with_ingredients_factory(
+            recipe_kwargs={'name': 'Chicken with Mushrooms'},
+            ingredient_kwargs_list=[
+                {'name': 'Chicken', 'measurement': '1 lb', 'order': 0},
+                {'name': 'Mushrooms', 'measurement': '1 cup', 'order': 1}
+            ]
+        )
+        recipe_with_ingredients_factory(
+            recipe_kwargs={'name': 'Chicken without Mushrooms'},
+            ingredient_kwargs_list=[
+                {'name': 'Chicken', 'measurement': '1 lb', 'order': 0},
+                {'name': 'Carrots', 'measurement': '2 cups', 'order': 1}
+            ]
+        )
+        recipe_with_ingredients_factory(
+            recipe_kwargs={'name': 'Beef with Mushrooms'},
+            ingredient_kwargs_list=[
+                {'name': 'Beef', 'measurement': '1 lb', 'order': 0},
+                {'name': 'Mushrooms', 'measurement': '1 cup', 'order': 1}
+            ]
+        )
+
+        # Act
+        response = api_client.get('/api/recipes/', {
+            'include_ingredients': 'Chicken',
+            'exclude_ingredients': 'Mushrooms'
+        })
+
+        # Assert
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 1
+        assert response.data[0]['name'] == 'Chicken without Mushrooms'
+
+    def test_filter_by_multiple_include_ingredients(self, api_client, recipe_with_ingredients_factory):
+        """Test filtering by multiple ingredients that must be included."""
+        # Arrange
+        recipe_with_ingredients_factory(
+            recipe_kwargs={'name': 'Chicken and Rice'},
+            ingredient_kwargs_list=[
+                {'name': 'Chicken', 'measurement': '1 lb', 'order': 0},
+                {'name': 'Rice', 'measurement': '2 cups', 'order': 1}
+            ]
+        )
+        recipe_with_ingredients_factory(
+            recipe_kwargs={'name': 'Just Chicken'},
+            ingredient_kwargs_list=[
+                {'name': 'Chicken', 'measurement': '1 lb', 'order': 0}
+            ]
+        )
+
+        # Act
+        response = api_client.get('/api/recipes/', {'include_ingredients': 'Chicken,Rice'})
+
+        # Assert
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 1
+        assert response.data[0]['name'] == 'Chicken and Rice'
+
+
+class TestRecipeDietaryTagsFilters:
+    """Tests for filtering recipes by dietary tags."""
+
+    def test_filter_by_single_dietary_tag(self, api_client, recipe_factory):
+        """Test filtering recipes by a single dietary tag."""
+        # Arrange
+        recipe_factory(name='Vegan Recipe', dietary_tags=['vegan'])
+        recipe_factory(name='Non-Vegan Recipe', dietary_tags=[])
+
+        # Act
+        response = api_client.get('/api/recipes/', {'dietary_tags': 'vegan'})
+
+        # Assert
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 1
+        assert response.data[0]['name'] == 'Vegan Recipe'
+
+    def test_filter_by_multiple_dietary_tags(self, api_client, recipe_factory):
+        """Test filtering recipes by multiple dietary tags."""
+        # Arrange
+        recipe_factory(name='Vegan and Gluten-Free', dietary_tags=['vegan', 'gluten_free'])
+        recipe_factory(name='Just Vegan', dietary_tags=['vegan'])
+        recipe_factory(name='Just Gluten-Free', dietary_tags=['gluten_free'])
+        recipe_factory(name='Neither', dietary_tags=[])
+
+        # Act
+        response = api_client.get('/api/recipes/', {'dietary_tags': 'vegan,gluten_free'})
+
+        # Assert
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 1
+        assert response.data[0]['name'] == 'Vegan and Gluten-Free'
+
+    def test_dietary_tags_with_empty_list_not_returned(self, api_client, recipe_factory):
+        """Test that recipes without dietary tags are not returned when filtering."""
+        # Arrange
+        recipe_factory(name='No Tags', dietary_tags=[])
+        recipe_factory(name='With Tags', dietary_tags=['keto'])
+
+        # Act
+        response = api_client.get('/api/recipes/', {'dietary_tags': 'keto'})
+
+        # Assert
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 1
+        assert response.data[0]['name'] == 'With Tags'
+
+
+class TestRecipeMultipleFilters:
+    """Tests for combining multiple filters simultaneously."""
+
+    def test_search_with_difficulty_filter(self, api_client, recipe_factory):
+        """Test combining search with difficulty filter."""
+        # Arrange
+        recipe_factory(name='Easy Cake', difficulty='easy')
+        recipe_factory(name='Hard Cake', difficulty='hard')
+        recipe_factory(name='Easy Bread', difficulty='easy')
+
+        # Act
+        response = api_client.get('/api/recipes/', {
+            'search': 'Cake',
+            'difficulty': 'easy'
+        })
+
+        # Assert
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 1
+        assert response.data[0]['name'] == 'Easy Cake'
+
+    def test_all_filters_combined(self, api_client, recipe_with_ingredients_factory):
+        """Test combining all filters simultaneously."""
+        # Arrange
+        recipe_with_ingredients_factory(
+            recipe_kwargs={
+                'name': 'Quick Vegan Chicken Alternative',
+                'difficulty': 'easy',
+                'prep_time': 10,
+                'cook_time': 15,
+                'dietary_tags': ['vegan']
+            },
+            ingredient_kwargs_list=[
+                {'name': 'Tofu', 'measurement': '1 lb', 'order': 0}
+            ]
+        )
+        recipe_with_ingredients_factory(
+            recipe_kwargs={
+                'name': 'Quick Vegan Mushroom Dish',
+                'difficulty': 'easy',
+                'prep_time': 10,
+                'cook_time': 15,
+                'dietary_tags': ['vegan']
+            },
+            ingredient_kwargs_list=[
+                {'name': 'Mushrooms', 'measurement': '2 cups', 'order': 0}
+            ]
+        )
+        recipe_with_ingredients_factory(
+            recipe_kwargs={
+                'name': 'Slow Non-Vegan',
+                'difficulty': 'hard',
+                'prep_time': 60,
+                'cook_time': 120,
+                'dietary_tags': []
+            },
+            ingredient_kwargs_list=[
+                {'name': 'Tofu', 'measurement': '1 lb', 'order': 0}
+            ]
+        )
+
+        # Act
+        response = api_client.get('/api/recipes/', {
+            'search': 'Vegan',
+            'difficulty': 'easy',
+            'max_prep_time': '30',
+            'max_cook_time': '30',
+            'include_ingredients': 'Tofu',
+            'dietary_tags': 'vegan'
+        })
+
+        # Assert
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == 1
+        assert response.data[0]['name'] == 'Quick Vegan Chicken Alternative'

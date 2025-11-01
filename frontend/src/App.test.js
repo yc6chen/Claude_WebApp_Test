@@ -266,6 +266,7 @@ describe('App', () => {
         difficulty: 'hard',
         prep_time: 30,
         cook_time: 45,
+        dietary_tags: [],
         ingredients: [],
       };
 
@@ -291,8 +292,8 @@ describe('App', () => {
 
       // Fill form
       await user.type(screen.getByLabelText(/recipe name/i), newRecipe.name);
-      await user.type(screen.getByLabelText(/prep time/i), '30');
-      await user.type(screen.getByLabelText(/cook time/i), '45');
+      await user.type(screen.getByLabelText(/prep time \(minutes\)/i), '30');
+      await user.type(screen.getByLabelText(/cook time \(minutes\)/i), '45');
 
       // Mock POST response
       fetch.mockResolvedValueOnce({
@@ -325,6 +326,7 @@ describe('App', () => {
         difficulty: 'hard',
         prep_time: 30,
         cook_time: 45,
+        dietary_tags: [],
         ingredients: [],
       };
 
@@ -347,8 +349,8 @@ describe('App', () => {
       });
 
       await user.type(screen.getByLabelText(/recipe name/i), newRecipe.name);
-      await user.type(screen.getByLabelText(/prep time/i), '30');
-      await user.type(screen.getByLabelText(/cook time/i), '45');
+      await user.type(screen.getByLabelText(/prep time \(minutes\)/i), '30');
+      await user.type(screen.getByLabelText(/cook time \(minutes\)/i), '45');
 
       // Mock POST response
       fetch.mockResolvedValueOnce({
@@ -376,6 +378,7 @@ describe('App', () => {
         difficulty: 'hard',
         prep_time: 30,
         cook_time: 45,
+        dietary_tags: [],
         ingredients: [],
       };
 
@@ -398,8 +401,8 @@ describe('App', () => {
       });
 
       await user.type(screen.getByLabelText(/recipe name/i), newRecipe.name);
-      await user.type(screen.getByLabelText(/prep time/i), '30');
-      await user.type(screen.getByLabelText(/cook time/i), '45');
+      await user.type(screen.getByLabelText(/prep time \(minutes\)/i), '30');
+      await user.type(screen.getByLabelText(/cook time \(minutes\)/i), '45');
 
       fetch.mockResolvedValueOnce({
         json: async () => newRecipe,
@@ -424,6 +427,7 @@ describe('App', () => {
         difficulty: 'easy',
         prep_time: 30,
         cook_time: 45,
+        dietary_tags: [],
         ingredients: [],
       };
 
@@ -445,8 +449,8 @@ describe('App', () => {
       });
 
       await user.type(screen.getByLabelText(/recipe name/i), newRecipe.name);
-      await user.type(screen.getByLabelText(/prep time/i), '30');
-      await user.type(screen.getByLabelText(/cook time/i), '45');
+      await user.type(screen.getByLabelText(/prep time \(minutes\)/i), '30');
+      await user.type(screen.getByLabelText(/cook time \(minutes\)/i), '45');
 
       fetch.mockResolvedValueOnce({
         json: async () => newRecipe,
@@ -482,8 +486,8 @@ describe('App', () => {
       });
 
       await user.type(screen.getByLabelText(/recipe name/i), 'Test Recipe');
-      await user.type(screen.getByLabelText(/prep time/i), '10');
-      await user.type(screen.getByLabelText(/cook time/i), '20');
+      await user.type(screen.getByLabelText(/prep time \(minutes\)/i), '10');
+      await user.type(screen.getByLabelText(/cook time \(minutes\)/i), '20');
 
       // Mock error
       fetch.mockRejectedValueOnce(new Error('API Error'));
@@ -669,8 +673,8 @@ describe('App', () => {
       });
 
       await user.type(screen.getByLabelText(/recipe name/i), 'New Recipe');
-      await user.type(screen.getByLabelText(/prep time/i), '5');
-      await user.type(screen.getByLabelText(/cook time/i), '10');
+      await user.type(screen.getByLabelText(/prep time \(minutes\)/i), '5');
+      await user.type(screen.getByLabelText(/cook time \(minutes\)/i), '10');
 
       const newRecipe = {
         id: 3,
@@ -680,6 +684,7 @@ describe('App', () => {
         difficulty: 'easy',
         prep_time: 5,
         cook_time: 10,
+        dietary_tags: [],
         ingredients: [],
       };
 

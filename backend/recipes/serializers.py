@@ -10,11 +10,16 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     ingredients = IngredientSerializer(many=True, required=False)
+    dietary_tags = serializers.ListField(
+        child=serializers.CharField(),
+        required=False,
+        default=list
+    )
 
     class Meta:
         model = Recipe
         fields = ['id', 'name', 'description', 'category', 'prep_time', 'cook_time',
-                  'difficulty', 'ingredients', 'created_at', 'updated_at']
+                  'difficulty', 'dietary_tags', 'ingredients', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at']
 
     def create(self, validated_data):
@@ -35,6 +40,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         instance.prep_time = validated_data.get('prep_time', instance.prep_time)
         instance.cook_time = validated_data.get('cook_time', instance.cook_time)
         instance.difficulty = validated_data.get('difficulty', instance.difficulty)
+        instance.dietary_tags = validated_data.get('dietary_tags', instance.dietary_tags)
         instance.save()
 
         if ingredients_data is not None:
