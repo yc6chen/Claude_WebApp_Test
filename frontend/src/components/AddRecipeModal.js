@@ -18,9 +18,13 @@ import {
   Paper,
   OutlinedInput,
   Chip,
+  FormControlLabel,
+  Switch,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
+import LockIcon from '@mui/icons-material/Lock';
+import PublicIcon from '@mui/icons-material/Public';
 
 const DIETARY_TAGS = [
   { value: 'vegan', label: 'Vegan' },
@@ -45,6 +49,7 @@ const AddRecipeModal = ({ open, onClose, onAdd }) => {
     difficulty: 'easy',
     dietary_tags: [],
     ingredients: [],
+    is_private: false,
   });
 
   const [newIngredient, setNewIngredient] = useState({
@@ -140,6 +145,7 @@ const AddRecipeModal = ({ open, onClose, onAdd }) => {
       difficulty: 'easy',
       dietary_tags: [],
       ingredients: [],
+      is_private: false,
     });
     setNewIngredient({ name: '', measurement: '' });
     setTimeErrors({ prep_time: false, cook_time: false });
@@ -271,6 +277,24 @@ const AddRecipeModal = ({ open, onClose, onAdd }) => {
               ))}
             </Select>
           </FormControl>
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={formData.is_private}
+                onChange={(e) => setFormData({ ...formData, is_private: e.target.checked })}
+                name="is_private"
+              />
+            }
+            label={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                {formData.is_private ? <LockIcon fontSize="small" /> : <PublicIcon fontSize="small" />}
+                <Typography>
+                  {formData.is_private ? 'Private (only you can see)' : 'Public (everyone can see)'}
+                </Typography>
+              </Box>
+            }
+          />
 
           <Box>
             <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>

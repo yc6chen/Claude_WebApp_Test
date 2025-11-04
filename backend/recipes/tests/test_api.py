@@ -222,8 +222,9 @@ class TestRecipeRetrieveEndpoint:
 class TestRecipeUpdateEndpoint:
     """Test suite for PUT /api/recipes/{id}/ endpoint."""
 
-    def test_update_recipe_full(self, api_client, sample_recipe_data):
-        """Test full update of recipe with PUT."""
+    def test_update_recipe_full(self, authenticated_client, test_user, sample_recipe_data):
+        """Test full update of recipe with PUT (owner only)."""
+        sample_recipe_data['owner'] = test_user
         recipe = Recipe.objects.create(**sample_recipe_data)
 
         update_data = {
@@ -235,7 +236,7 @@ class TestRecipeUpdateEndpoint:
             'difficulty': 'hard'
         }
 
-        response = api_client.put(f'/api/recipes/{recipe.id}/', update_data, format='json')
+        response = authenticated_client.put(f'/api/recipes/{recipe.id}/', update_data, format='json')
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data['name'] == 'Updated Recipe Name'
@@ -248,8 +249,9 @@ class TestRecipeUpdateEndpoint:
         recipe.refresh_from_db()
         assert recipe.name == 'Updated Recipe Name'
 
-    def test_update_recipe_replace_ingredients(self, api_client, sample_recipe_data):
-        """Test updating recipe replaces ingredients."""
+    def test_update_recipe_replace_ingredients(self, authenticated_client, test_user, sample_recipe_data):
+        """Test updating recipe replaces ingredients (owner only)."""
+        sample_recipe_data['owner'] = test_user
         recipe = Recipe.objects.create(**sample_recipe_data)
         Ingredient.objects.create(recipe=recipe, name='Old Ing 1', measurement='1 cup', order=1)
         Ingredient.objects.create(recipe=recipe, name='Old Ing 2', measurement='2 cups', order=2)
@@ -263,7 +265,7 @@ class TestRecipeUpdateEndpoint:
             ]
         }
 
-        response = api_client.put(f'/api/recipes/{recipe.id}/', update_data, format='json')
+        response = authenticated_client.put(f'/api/recipes/{recipe.id}/', update_data, format='json')
 
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data['ingredients']) == 1
@@ -274,9 +276,9 @@ class TestRecipeUpdateEndpoint:
         assert recipe.ingredients.count() == 1
         assert recipe.ingredients.first().name == 'New Ing 1'
 
-    def test_update_nonexistent_recipe(self, api_client, sample_recipe_data):
+    def test_update_nonexistent_recipe(self, authenticated_client, sample_recipe_data):
         """Test updating non-existent recipe returns 404."""
-        response = api_client.put('/api/recipes/99999/', sample_recipe_data, format='json')
+        response = authenticated_client.put('/api/recipes/99999/', sample_recipe_data, format='json')
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -286,21 +288,23 @@ class TestRecipeUpdateEndpoint:
 class TestRecipePartialUpdateEndpoint:
     """Test suite for PATCH /api/recipes/{id}/ endpoint."""
 
-    def test_partial_update_recipe_name_only(self, api_client, sample_recipe_data):
-        """Test partial update of only recipe name."""
+    def test_partial_update_recipe_name_only(self, authenticated_client, test_user, sample_recipe_data):
+        """Test partial update of only recipe name (owner only)."""
+        sample_recipe_data['owner'] = test_user
         recipe = Recipe.objects.create(**sample_recipe_data)
         original_prep_time = recipe.prep_time
 
         update_data = {'name': 'Partially Updated Name'}
 
-        response = api_client.patch(f'/api/recipes/{recipe.id}/', update_data, format='json')
+        response = authenticated_client.patch(f'/api/recipes/{recipe.id}/', update_data, format='json')
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data['name'] == 'Partially Updated Name'
         assert response.data['prep_time'] == original_prep_time  # Unchanged
 
-    def test_partial_update_recipe_time_fields(self, api_client, sample_recipe_data):
-        """Test partial update of time fields only."""
+    def test_partial_update_recipe_time_fields(self, authenticated_client, test_user, sample_recipe_data):
+        """Test partial update of time fields only (owner only)."""
+        sample_recipe_data['owner'] = test_user
         recipe = Recipe.objects.create(**sample_recipe_data)
         original_name = recipe.name
 
@@ -309,15 +313,16 @@ class TestRecipePartialUpdateEndpoint:
             'cook_time': 60
         }
 
-        response = api_client.patch(f'/api/recipes/{recipe.id}/', update_data, format='json')
+        response = authenticated_client.patch(f'/api/recipes/{recipe.id}/', update_data, format='json')
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data['prep_time'] == 50
         assert response.data['cook_time'] == 60
         assert response.data['name'] == original_name  # Unchanged
 
-    def test_partial_update_recipe_ingredients_only(self, api_client, sample_recipe_data):
-        """Test partial update of ingredients only."""
+    def test_partial_update_recipe_ingredients_only(self, authenticated_client, test_user, sample_recipe_data):
+        """Test partial update of ingredients only (owner only)."""
+        sample_recipe_data['owner'] = test_user
         recipe = Recipe.objects.create(**sample_recipe_data)
         Ingredient.objects.create(recipe=recipe, name='Old', measurement='1', order=1)
 
@@ -327,19 +332,20 @@ class TestRecipePartialUpdateEndpoint:
             ]
         }
 
-        response = api_client.patch(f'/api/recipes/{recipe.id}/', update_data, format='json')
+        response = authenticated_client.patch(f'/api/recipes/{recipe.id}/', update_data, format='json')
 
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data['ingredients']) == 1
         assert response.data['ingredients'][0]['name'] == 'New'
 
-    def test_partial_update_invalid_field(self, api_client, sample_recipe_data):
-        """Test partial update with invalid field value returns 400."""
+    def test_partial_update_invalid_field(self, authenticated_client, test_user, sample_recipe_data):
+        """Test partial update with invalid field value returns 400 (owner only)."""
+        sample_recipe_data['owner'] = test_user
         recipe = Recipe.objects.create(**sample_recipe_data)
 
         update_data = {'difficulty': 'invalid'}
 
-        response = api_client.patch(f'/api/recipes/{recipe.id}/', update_data, format='json')
+        response = authenticated_client.patch(f'/api/recipes/{recipe.id}/', update_data, format='json')
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert 'difficulty' in response.data
@@ -350,46 +356,49 @@ class TestRecipePartialUpdateEndpoint:
 class TestRecipeDeleteEndpoint:
     """Test suite for DELETE /api/recipes/{id}/ endpoint."""
 
-    def test_delete_recipe(self, api_client, sample_recipe_data):
-        """Test deleting a recipe."""
+    def test_delete_recipe(self, authenticated_client, test_user, sample_recipe_data):
+        """Test deleting a recipe (owner only)."""
+        sample_recipe_data['owner'] = test_user
         recipe = Recipe.objects.create(**sample_recipe_data)
         recipe_id = recipe.id
 
-        response = api_client.delete(f'/api/recipes/{recipe_id}/')
+        response = authenticated_client.delete(f'/api/recipes/{recipe_id}/')
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert Recipe.objects.filter(id=recipe_id).count() == 0
 
-    def test_delete_recipe_cascades_to_ingredients(self, api_client, sample_recipe_data):
-        """Test deleting recipe also deletes associated ingredients."""
+    def test_delete_recipe_cascades_to_ingredients(self, authenticated_client, test_user, sample_recipe_data):
+        """Test deleting recipe also deletes associated ingredients (owner only)."""
+        sample_recipe_data['owner'] = test_user
         recipe = Recipe.objects.create(**sample_recipe_data)
         Ingredient.objects.create(recipe=recipe, name='Ing 1', measurement='1', order=1)
         Ingredient.objects.create(recipe=recipe, name='Ing 2', measurement='2', order=2)
 
         assert Ingredient.objects.filter(recipe=recipe).count() == 2
 
-        response = api_client.delete(f'/api/recipes/{recipe.id}/')
+        response = authenticated_client.delete(f'/api/recipes/{recipe.id}/')
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert Ingredient.objects.filter(recipe=recipe).count() == 0
 
-    def test_delete_nonexistent_recipe(self, api_client):
+    def test_delete_nonexistent_recipe(self, authenticated_client):
         """Test deleting non-existent recipe returns 404."""
-        response = api_client.delete('/api/recipes/99999/')
+        response = authenticated_client.delete('/api/recipes/99999/')
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-    def test_delete_recipe_idempotent(self, api_client, sample_recipe_data):
-        """Test that deleting already deleted recipe returns 404."""
+    def test_delete_recipe_idempotent(self, authenticated_client, test_user, sample_recipe_data):
+        """Test that deleting already deleted recipe returns 404 (owner only)."""
+        sample_recipe_data['owner'] = test_user
         recipe = Recipe.objects.create(**sample_recipe_data)
         recipe_id = recipe.id
 
         # First delete
-        response1 = api_client.delete(f'/api/recipes/{recipe_id}/')
+        response1 = authenticated_client.delete(f'/api/recipes/{recipe_id}/')
         assert response1.status_code == status.HTTP_204_NO_CONTENT
 
         # Second delete should return 404
-        response2 = api_client.delete(f'/api/recipes/{recipe_id}/')
+        response2 = authenticated_client.delete(f'/api/recipes/{recipe_id}/')
         assert response2.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -420,8 +429,9 @@ class TestRecipeAPIComplexScenarios:
         assert Recipe.objects.count() == 3
         assert Ingredient.objects.count() == 9
 
-    def test_update_recipe_maintains_relationships(self, api_client, sample_recipe_data):
-        """Test that updating recipe maintains proper relationships."""
+    def test_update_recipe_maintains_relationships(self, authenticated_client, test_user, sample_recipe_data):
+        """Test that updating recipe maintains proper relationships (owner only)."""
+        sample_recipe_data['owner'] = test_user
         recipe = Recipe.objects.create(**sample_recipe_data)
         Ingredient.objects.create(recipe=recipe, name='Orig', measurement='1', order=1)
 
@@ -436,7 +446,7 @@ class TestRecipeAPIComplexScenarios:
             ]
         }
 
-        response = api_client.put(f'/api/recipes/{recipe.id}/', update_data, format='json')
+        response = authenticated_client.put(f'/api/recipes/{recipe.id}/', update_data, format='json')
 
         assert response.status_code == status.HTTP_200_OK
 

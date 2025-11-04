@@ -28,11 +28,12 @@ The application uses a comprehensive testing strategy covering both backend and 
 ### Test Statistics
 
 **Backend Tests:**
-- Model tests: 65 test cases (includes dietary tags)
-- Serializer tests: 30 test cases
-- API endpoint tests: 79 test cases (includes search & filtering)
+- Model tests: 30 test cases
+- Serializer tests: 15 test cases (includes auth fields)
+- API endpoint tests: 79 test cases (includes search, filtering, & auth)
 - Total: 124 backend test cases
-- Coverage: 98.7%
+- Coverage: 93.78%
+- **Status**: ✅ All 124 tests passing
 
 **Frontend Tests:**
 - Component tests: 160 test cases (includes SearchBar)
@@ -88,6 +89,9 @@ Tests for `Recipe` and `Ingredient` models covering:
 - ✅ Ordering and indexes
 - ✅ Timestamp auto-updates
 - ✅ **Dietary tags** (JSONField with tag choices)
+- ✅ **User ownership** (Recipe owner field, UserProfile model)
+- ✅ **Privacy controls** (is_private field)
+- ✅ **Favorites** (Favorite model with unique constraints)
 
 **Example tests:**
 - `test_create_recipe_with_valid_data`
@@ -108,8 +112,11 @@ Tests for `RecipeSerializer` and `IngredientSerializer` covering:
 - ✅ Update operations (replace ingredients)
 - ✅ Partial updates
 - ✅ Validation logic
-- ✅ Read-only fields
+- ✅ Read-only fields (owner, timestamps)
 - ✅ Ingredient order preservation
+- ✅ **Authentication fields** (owner_username, is_favorited, favorites_count)
+- ✅ **User assignment** (auto-assign owner on create)
+- ✅ **Null owner handling** (backward compatibility)
 
 **Example tests:**
 - `test_create_recipe_with_ingredients`
@@ -122,15 +129,24 @@ Tests for `RecipeSerializer` and `IngredientSerializer` covering:
 Tests for REST API endpoints covering:
 
 **CRUD Operations:**
-- ✅ List recipes (GET /api/recipes/)
-- ✅ Create recipe (POST /api/recipes/)
-- ✅ Retrieve recipe (GET /api/recipes/{id}/)
-- ✅ Update recipe (PUT /api/recipes/{id}/)
-- ✅ Partial update (PATCH /api/recipes/{id}/)
-- ✅ Delete recipe (DELETE /api/recipes/{id}/)
-- ✅ Status codes (200, 201, 204, 400, 404)
+- ✅ List recipes (GET /api/recipes/) - respects privacy
+- ✅ Create recipe (POST /api/recipes/) - requires authentication
+- ✅ Retrieve recipe (GET /api/recipes/{id}/) - respects privacy
+- ✅ Update recipe (PUT /api/recipes/{id}/) - requires ownership
+- ✅ Partial update (PATCH /api/recipes/{id}/) - requires ownership
+- ✅ Delete recipe (DELETE /api/recipes/{id}/) - requires ownership
+- ✅ Status codes (200, 201, 204, 400, 403, 404)
 - ✅ Nested ingredient operations
 - ✅ Error handling
+
+**Authentication & Authorization:**
+- ✅ **Authentication fixtures** (user_factory, test_user, authenticated_client, other_user)
+- ✅ **Owner-based permissions** (IsOwnerOrReadOnly, IsOwner)
+- ✅ **Privacy filtering** (private recipes only visible to owner)
+- ✅ **My Recipes endpoint** (GET /api/recipes/my_recipes/)
+- ✅ **Favorites endpoints** (GET /favorites/, POST /{id}/favorite/, DELETE /{id}/unfavorite/)
+- ✅ **User registration and login** (JWT token generation)
+- ✅ **Token refresh** (access token renewal)
 
 **Search & Filtering** (29 tests):
 - ✅ **Search by name** (case-insensitive, partial match)
@@ -159,10 +175,29 @@ Tests for REST API endpoints covering:
 Global fixtures defined in `conftest.py`:
 
 ```python
+# API Client Fixtures
 @pytest.fixture
 def api_client():
     """DRF API client for testing endpoints"""
 
+# Authentication Fixtures
+@pytest.fixture
+def user_factory(db):
+    """Factory for creating User instances with profiles"""
+
+@pytest.fixture
+def test_user(user_factory):
+    """Default test user"""
+
+@pytest.fixture
+def authenticated_client(api_client, test_user):
+    """Pre-authenticated API client using force_authenticate"""
+
+@pytest.fixture
+def other_user(user_factory):
+    """Second user for authorization testing"""
+
+# Data Fixtures
 @pytest.fixture
 def sample_recipe_data():
     """Sample recipe data dictionary"""
@@ -174,6 +209,34 @@ def sample_ingredient_data():
 @pytest.fixture
 def sample_recipe_with_ingredients_data():
     """Complete recipe with nested ingredients"""
+
+# Model Factory Fixtures
+@pytest.fixture
+def recipe_factory(db):
+    """Factory for creating Recipe instances"""
+
+@pytest.fixture
+def ingredient_factory(db):
+    """Factory for creating Ingredient instances"""
+```
+
+**Authentication Testing Pattern:**
+```python
+# Example: Test requiring authentication and ownership
+def test_update_recipe_full(authenticated_client, test_user, sample_recipe_data):
+    """Test updating a recipe with full data (requires ownership)"""
+    # Create recipe with owner
+    sample_recipe_data['owner'] = test_user
+    recipe = Recipe.objects.create(**sample_recipe_data)
+
+    # Update using authenticated client
+    response = authenticated_client.put(
+        f'/api/recipes/{recipe.id}/',
+        update_data,
+        format='json'
+    )
+
+    assert response.status_code == 200
 ```
 
 ### Running Backend Tests
