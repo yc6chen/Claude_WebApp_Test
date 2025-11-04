@@ -129,9 +129,7 @@ cd frontend && npm test -- --watchAll=false
 
 For detailed testing information, see:
 - [TEST_QUICK_START.md](./TEST_QUICK_START.md) - Quick reference guide
-- [TESTING.md](./TESTING.md) - Comprehensive testing documentation
-- [TEST_SUITE_SUMMARY.md](./TEST_SUITE_SUMMARY.md) - Test suite overview
-- [e2e/README.md](./e2e/README.md) - E2E testing with Playwright
+- [TESTING.md](./TESTING.md) - Comprehensive testing documentation (Backend, Frontend, E2E)
 
 ## Development
 
@@ -146,20 +144,21 @@ The application uses volume mounting for hot-reloading during development:
 **Important**: When adding new features or tests, please update the relevant documentation files.
 
 A comprehensive documentation update system is in place:
-- See [DOCUMENTATION_MAINTENANCE.md](./DOCUMENTATION_MAINTENANCE.md) for detailed guidelines
-- See [DOCUMENTATION_UPDATE_SYSTEM.md](./DOCUMENTATION_UPDATE_SYSTEM.md) for system overview
+- See [DOCUMENTATION_MAINTENANCE.md](./DOCUMENTATION_MAINTENANCE.md) for detailed guidelines and system overview
 - Use [.github/FEATURE_CHECKLIST.md](./.github/FEATURE_CHECKLIST.md) as a template when adding features
 
 ### Available Documentation
 
 **Core Documentation:**
 - [README.md](./README.md) - This file, project overview
-- [TESTING.md](./TESTING.md) - Comprehensive testing guide
+- [TESTING.md](./TESTING.md) - Comprehensive testing guide (Backend, Frontend, E2E)
 - [TEST_QUICK_START.md](./TEST_QUICK_START.md) - Quick testing reference
-- [TEST_SUITE_SUMMARY.md](./TEST_SUITE_SUMMARY.md) - Test suite summary
 
 **Maintenance & Contributing:**
-- [DOCUMENTATION_MAINTENANCE.md](./DOCUMENTATION_MAINTENANCE.md) - Guidelines for updating docs
-- [DOCUMENTATION_UPDATE_SYSTEM.md](./DOCUMENTATION_UPDATE_SYSTEM.md) - System overview
+- [DOCUMENTATION_MAINTENANCE.md](./DOCUMENTATION_MAINTENANCE.md) - Guidelines for updating docs and system overview
 - [.github/FEATURE_CHECKLIST.md](./.github/FEATURE_CHECKLIST.md) - Feature addition checklist template
 - [.github/DOCUMENTATION_TEMPLATE.md](./.github/DOCUMENTATION_TEMPLATE.md) - Template for new documentation files
+
+**Testing Best Practices:**
+- [backend/TEST_IMPROVEMENTS.md](./backend/TEST_IMPROVEMENTS.md) - Pytest improvements and patterns
+- [frontend/TEST_IMPROVEMENTS.md](./frontend/TEST_IMPROVEMENTS.md) - React Testing Library improvements and patterns

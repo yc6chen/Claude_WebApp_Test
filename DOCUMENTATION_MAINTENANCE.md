@@ -2,22 +2,64 @@
 
 This guide ensures all documentation files stay synchronized with code changes, new features, and test additions.
 
+## 🎯 System Overview
+
+A comprehensive documentation system has been established to ensure documentation stays synchronized with code changes, new features, and test additions. This system includes guidelines, templates, and workflows to maintain high-quality documentation.
+
+### Documentation Hierarchy
+
+```
+README.md (Main entry point)
+├── Points to DOCUMENTATION_MAINTENANCE.md
+├── Links to all testing docs
+└── Includes Testing section
+
+DOCUMENTATION_MAINTENANCE.md (Guidelines - This file)
+├── Comprehensive update guidelines
+├── Checklists for different change types
+├── Best practices
+└── Quick reference table
+
+TEST_QUICK_START.md (Quick reference)
+├── Prerequisites
+├── Quick commands
+├── Expected output
+└── Links to comprehensive guides
+
+TESTING.md (Comprehensive guide)
+├── Quick summary with test statistics
+├── Detailed testing information
+├── Examples and patterns
+├── Contributing section
+└── Covers all test types (Backend, Frontend, E2E)
+
+backend/TEST_IMPROVEMENTS.md (Backend best practices)
+└── Pytest improvements and patterns
+
+frontend/TEST_IMPROVEMENTS.md (Frontend best practices)
+└── React Testing Library improvements
+```
+
+### Key Features of the System
+
+1. **Visible Reminders**: Every major documentation file includes clear reminders to update documentation
+2. **Comprehensive Guidelines**: DOCUMENTATION_MAINTENANCE.md provides when and what to update
+3. **Cross-References**: All documentation files link to each other for easy navigation
+4. **Clear Responsibility**: Each file has clear guidance on who should update it and when
+
 ## 📋 Documentation Files to Update
 
 ### Root Level Documentation
 - **README.md** - Main project overview, features, setup instructions
-- **TESTING.md** - Comprehensive testing documentation
-- **TEST_SUITE_SUMMARY.md** - Summary of all tests and coverage
+- **TESTING.md** - Comprehensive testing documentation (Backend, Frontend, E2E)
 - **TEST_QUICK_START.md** - Quick reference for running tests
 - **DOCUMENTATION_MAINTENANCE.md** - This file
 
 ### Backend Documentation
-- **backend/PYTEST_COMPARISON.md** - Pytest vs unittest comparison
-- **backend/TEST_IMPROVEMENTS_SUMMARY.md** - Testing improvements summary
+- **backend/TEST_IMPROVEMENTS.md** - Pytest best practices and improvements
 
 ### Frontend Documentation
-- **frontend/REACT_TESTING_COMPARISON.md** - React testing comparison
-- **frontend/REACT_TESTING_IMPROVEMENTS.md** - React testing improvements
+- **frontend/TEST_IMPROVEMENTS.md** - React Testing Library best practices and improvements
 
 ## ⚙️ When to Update Documentation
 
@@ -52,7 +94,7 @@ TEST_QUICK_START.md:
 When adding new tests, update these files:
 
 #### ✅ Required Updates
-- [ ] **TEST_SUITE_SUMMARY.md** - Update test counts and categories
+- [ ] **TESTING.md** - Update Quick Summary table with test counts and coverage
 - [ ] **TEST_QUICK_START.md** - Update test counts in Expected Output
 - [ ] **TESTING.md** - Add new test examples if introducing new patterns
 - [ ] **Backend/Frontend specific docs** - Update if changing testing approach
@@ -64,14 +106,13 @@ TEST_QUICK_START.md:
 - Update test file locations if new test files added
 - Update "Test Categories" table
 
-TEST_SUITE_SUMMARY.md:
-- Update total test counts
+TESTING.md:
+- Update "Quick Summary" table at top
+- Update test counts in Overview section
+- Update Test File Locations section
 - Update coverage percentages
 - Add new test categories if applicable
-
-TESTING.md:
 - Add examples of new test patterns
-- Update test organization structure
 ```
 
 ### 3. Modifying API Endpoints
@@ -151,9 +192,9 @@ If adding Cypress E2E tests:
    - Add E2E test commands
    - Include expected output
 
-5. Update TEST_SUITE_SUMMARY.md:
-   - Add E2E test counts
-   - Update total test numbers
+5. Update TESTING.md:
+   - Add E2E test counts to Quick Summary table
+   - Update total test numbers in Overview
 
 6. Update this file (DOCUMENTATION_MAINTENANCE.md):
    - Add E2E_TESTING.md to the documentation files list
@@ -242,13 +283,6 @@ Before committing changes that affect features or tests:
 - Modifying test configuration
 - Changing coverage requirements
 
-### TEST_SUITE_SUMMARY.md Updates Needed When:
-- Adding/removing test files
-- Test counts change significantly
-- Coverage percentages change
-- Adding new test types
-- Changing test organization
-
 ### TEST_QUICK_START.md Updates Needed When:
 - Adding new test commands
 - Test execution process changes
@@ -264,10 +298,10 @@ Consider implementing these automated checks:
 ```bash
 # Count tests and compare with documentation
 backend_test_count=$(pytest --collect-only -q | grep "test" | wc -l)
-documented_count=$(grep -oP 'Total.*\K\d+' TEST_SUITE_SUMMARY.md)
+documented_count=$(grep -oP 'Backend.*\K\d+' TESTING.md | head -1)
 
 if [ "$backend_test_count" != "$documented_count" ]; then
-    echo "⚠️  Test count mismatch! Update documentation."
+    echo "⚠️  Test count mismatch! Update TESTING.md Quick Summary table."
     echo "Actual: $backend_test_count | Documented: $documented_count"
     exit 1
 fi
@@ -281,11 +315,11 @@ fi
 
 ## 🎯 Quick Reference: What to Update Where
 
-| Change Type | README.md | TESTING.md | TEST_SUITE_SUMMARY.md | TEST_QUICK_START.md | Create New Docs? |
-|------------|-----------|------------|----------------------|-------------------|-----------------|
-| New Feature | ✅ Yes | ✅ Yes | Maybe | Maybe | If Complex |
-| New Tests | Maybe | Maybe | ✅ Yes | ✅ Yes | If New Pattern |
-| API Changes | ✅ Yes | ✅ Yes | No | Maybe | If Extensive |
+| Change Type | README.md | TESTING.md | TEST_QUICK_START.md | Create New Docs? |
+|------------|-----------|------------|-------------------|-----------------|
+| New Feature | ✅ Yes | ✅ Yes | Maybe | If Complex |
+| New Tests | Maybe | ✅ Yes (Quick Summary) | ✅ Yes | If New Pattern |
+| API Changes | ✅ Yes | ✅ Yes | Maybe | If Extensive |
 | Structure Changes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | No |
 | Dependency Updates | ✅ Yes | ✅ Yes | No | No | If Major |
 | Coverage Changes | No | Maybe | ✅ Yes | ✅ Yes | No |

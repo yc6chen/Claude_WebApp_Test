@@ -1,6 +1,33 @@
 # Testing Documentation
 
-This document provides comprehensive information about the test suites for the Recipe Management Application, including setup instructions, running tests, and test coverage details.
+Comprehensive guide for testing the Recipe Management Application.
+
+**Last Updated**: 2025-10-31
+
+## 📊 Quick Summary
+
+| Test Suite | Count | Coverage | Time |
+|------------|-------|----------|------|
+| **Backend (pytest)** | 124 | 98.7% | ~6s |
+| **Frontend (Jest)** | 160 (1 skipped) | 78.7% | ~32s |
+| **E2E (Playwright)** | 29 | Full workflows | ~45s |
+| **TOTAL** | **313** | **88%+** | **~1min 23s** |
+
+**Quick Start:**
+```bash
+# Backend
+cd backend && pytest
+
+# Frontend
+cd frontend && npm test -- --watchAll=false
+
+# E2E
+./run-e2e-tests.sh
+```
+
+For detailed commands, see [TEST_QUICK_START.md](./TEST_QUICK_START.md).
+
+---
 
 ## Table of Contents
 
@@ -18,33 +45,49 @@ This document provides comprehensive information about the test suites for the R
 
 ## Overview
 
-The application uses a comprehensive testing strategy covering both backend and frontend:
+The application uses a comprehensive testing strategy with **313+ test cases** covering all layers:
 
-- **Backend**: pytest with Django integration
-- **Frontend**: Jest with React Testing Library
-- **E2E**: Playwright for end-to-end testing
+- **Backend**: pytest with Django integration (124 tests, 98.7% coverage)
+- **Frontend**: Jest with React Testing Library (160 tests, 78.7% coverage)
+- **E2E**: Playwright for end-to-end testing (29 tests, full workflows)
 - **Test Types**: Unit tests, integration tests, API tests, and E2E workflow tests
 
-### Test Statistics
+### Test File Locations
 
-**Backend Tests:**
-- Model tests: 65 test cases (includes dietary tags)
-- Serializer tests: 30 test cases
-- API endpoint tests: 79 test cases (includes search & filtering)
-- Total: 124 backend test cases
-- Coverage: 98.7%
+**Backend Tests** (backend/recipes/tests/):
+- **test_models.py** - 65 tests
+  - Recipe model creation, validation, properties
+  - Ingredient model relationships, ordering
+  - Dietary tags functionality
+  - Database constraints and cascade deletes
 
-**Frontend Tests:**
-- Component tests: 160 test cases (includes SearchBar)
-- Total: 160 frontend test cases
-- Coverage: 78.7%
-- Skipped: 1 test (SearchBar difficulty filter - MUI timing issue)
+- **test_serializers.py** - 30 tests
+  - Recipe/Ingredient serialization
+  - Nested ingredient handling
+  - Create and update operations
+  - Validation logic
 
-**E2E Tests:**
-- Workflow tests: 29 test cases
-- Coverage: Full user workflows
+- **test_api.py** - 79 tests
+  - All API endpoints (List, Create, Retrieve, Update, Delete)
+  - Search by name (3 tests)
+  - Filter by difficulty (2 tests)
+  - Filter by time (3 tests)
+  - Filter by ingredients (4 tests)
+  - Filter by dietary tags (3 tests)
+  - Combined filters (2 tests)
+  - Error handling and status codes
 
-**Overall**: 313 comprehensive test cases (88%+ coverage)
+**Frontend Tests** (frontend/src/):
+- **App.test.js** - 30+ tests (integration workflows)
+- **components/AddRecipeModal.test.js** - 40+ tests (form handling, validation)
+- **components/RecipeList.test.js** - 45+ tests (list rendering, selection, SearchBar integration)
+- **components/RecipeDetail.test.js** - 40+ tests (display, deletion, dietary tags)
+- **components/SearchBar.test.js** - 15 tests (search, filtering; 1 skipped)
+
+**E2E Tests** (e2e/tests/):
+- **recipe-app.spec.js** - 29 tests
+  - Recipe CRUD operations (15 tests)
+  - Search and filtering workflows (14 tests)
 
 ---
 
@@ -429,6 +472,191 @@ Time:        15.234s
 ---
 
 ## End-to-End Testing (Playwright)
+
+### Technology Stack
+
+- **Playwright**: Modern E2E testing framework
+- **Docker**: Containerized E2E test execution
+- **Headless Browser**: Chromium, Firefox, WebKit for consistent testing
+
+### Why Playwright?
+
+- **Cross-browser testing**: Chrome, Firefox, Safari (WebKit)
+- **Modern and fast**: Parallel execution, auto-wait
+- **Official Docker support**: Easy CI/CD integration
+- **Rich debugging tools**: Trace viewer, UI mode, screenshots
+- **Network control**: Mock APIs, intercept requests
+
+### Test Structure
+
+```
+e2e/
+├── playwright.config.js       # Playwright configuration
+├── Dockerfile                 # Docker container for E2E tests
+├── tests/
+│   └── recipe-app.spec.js    # E2E test suite (29 tests)
+└── run-e2e-tests.sh          # Script to run tests in Docker
+```
+
+### Test Coverage
+
+Current E2E test coverage includes:
+- ✅ Recipe CRUD operations (15 tests)
+  - Adding recipes with all fields
+  - Viewing recipe details
+  - Deleting recipes
+  - Category organization
+  - Multi-step workflows
+- ✅ Search and Filtering (14 tests)
+  - Search bar visibility and functionality
+  - Advanced filters panel toggle
+  - Search by recipe name
+  - Filter by difficulty level
+  - Filter by prep/cook time
+  - Filter by ingredients (include/exclude)
+  - Filter by dietary tags
+  - Combined filters
+  - Clear filters functionality
+
+### Running E2E Tests
+
+**Using the provided script:**
+```bash
+./run-e2e-tests.sh
+```
+
+**Expected output:**
+```
+Running 29 tests using 1 worker
+
+✓  recipe-app.spec.js:29:5 › should display search bar in recipe list (1s)
+✓  recipe-app.spec.js:34:5 › should show advanced filters when filter button is clicked (2s)
+...
+29 passed (45s)
+
+✅ All E2E tests passed!
+```
+
+**With options:**
+```bash
+# Run with fresh build
+./run-e2e-tests.sh --build
+
+# Run and show HTML report
+./run-e2e-tests.sh --report
+```
+
+**Manual Docker execution:**
+```bash
+cd e2e
+docker build -t recipe-e2e-tests .
+docker run --rm --network=host recipe-e2e-tests
+```
+
+### E2E Test Architecture
+
+The E2E testing architecture consists of:
+
+```
+┌─────────────────────────────────────────┐
+│  Playwright Container                    │
+│  (mcr.microsoft.com/playwright)         │
+│  ┌───────────────────────────────────┐ │
+│  │ Chromium, Firefox, WebKit         │ │
+│  │ browsers + dependencies           │ │
+│  └───────────────────────────────────┘ │
+│          │                               │
+│          │ HTTP requests                │
+│          ▼                               │
+│  ┌───────────────────────────────────┐ │
+│  │ Tests (*.spec.js)                 │ │
+│  └───────────────────────────────────┘ │
+└─────────────────────────────────────────┘
+                 │
+                 │ network_mode: service:frontend
+                 ▼
+┌─────────────────────────────────────────┐
+│  Frontend Container                      │
+│  React App (port 3000)                  │
+│          │                               │
+│          │ API calls                     │
+│          ▼                               │
+│  Backend Container                       │
+│  Django API (port 8000)                 │
+│          │                               │
+│          ▼                               │
+│  Database Container                      │
+│  PostgreSQL (port 5432)                 │
+└─────────────────────────────────────────┘
+```
+
+### Service Discovery
+
+The Playwright container uses `network_mode: "service:frontend"` to:
+- Share the frontend service's network stack
+- Access `http://frontend:3000` directly
+- Communicate with all services via Docker network
+
+### Debugging E2E Tests
+
+**Debug Mode:**
+```bash
+./run-e2e-tests.sh --debug
+```
+
+**UI Mode:**
+```bash
+./run-e2e-tests.sh --ui
+```
+
+**View Test Results:**
+```bash
+# View HTML report
+open e2e/playwright-report/index.html
+
+# Or serve it
+docker-compose --profile e2e run --rm -p 9323:9323 playwright npm run report
+```
+
+### E2E Test Benefits
+
+- ✅ **Complete workflow validation**: Tests full user journeys
+- ✅ **Browser environment**: Tests in real browser context
+- ✅ **Integration verification**: Validates frontend + backend + database
+- ✅ **Regression prevention**: Catches breaking changes across layers
+- ✅ **Difficulty filter coverage**: Verifies the MUI difficulty filter that's skipped in unit tests
+
+### Common E2E Issues & Solutions
+
+**Issue**: Services not accessible
+```bash
+# Solution: Ensure services are running first
+docker-compose up -d
+sleep 10
+./run-e2e-tests.sh
+```
+
+**Issue**: Tests fail with network errors
+```bash
+# Solution: Check network mode in docker-compose.yml
+# Playwright service should use network_mode: "service:frontend"
+```
+
+**Issue**: Browser launch failures
+```bash
+# Solution: Official Playwright image includes all browsers
+# Ensure using mcr.microsoft.com/playwright image
+# Check Docker has enough resources
+```
+
+**Issue**: Can't see test reports
+```bash
+# Solution: Reports are mounted as volumes
+ls -la e2e/playwright-report/
+# Open report: open e2e/playwright-report/index.html
+```
+
+---
 
 ### Technology Stack
 
@@ -935,7 +1163,7 @@ test.skip('difficulty filter calls onFilterChange - SKIPPED: MUI timing issue', 
 - SearchBar component: `frontend/src/components/SearchBar.js`
 - Test file: `frontend/src/components/SearchBar.test.js`
 - E2E coverage: `e2e/tests/recipe-app.spec.js` (difficulty filter tests passing)
-- Documentation: TEST_SUITE_SUMMARY.md, README.md
+- Documentation: This file (TESTING.md), README.md
 
 ---
 
