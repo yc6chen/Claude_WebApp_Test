@@ -31,12 +31,12 @@ Use this checklist when adding new features or tests to ensure all documentation
 - [ ] Update "Test Categories" table with new counts
 - [ ] Add any new common issues to troubleshooting
 
-### TEST_SUITE_SUMMARY.md
-- [ ] Update total test counts
-- [ ] Update coverage percentages
-- [ ] Add new test file descriptions
-- [ ] Update key features list
-- [ ] Update date modified
+### TESTING.md
+- [ ] Update Quick Summary table with total test counts
+- [ ] Update coverage percentages in Quick Summary
+- [ ] Update Test File Locations section if new test files added
+- [ ] Add examples for new test patterns if applicable
+- [ ] Update "Last Updated" date
 
 ## 📄 Additional Documentation (If Needed)
 

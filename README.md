@@ -4,29 +4,14 @@ A full-stack recipe management application with a React frontend, Django REST AP
 
 ## Features
 
-### Authentication & User Management
-- **User Registration**: Secure account creation with email validation
-- **User Login**: JWT-based authentication with access and refresh tokens
-- **User Profiles**: Customizable profiles with bio and avatar
-- **Password Security**: PBKDF2 hashing with Django's password validation
-- **Token Management**: Automatic token refresh, rotation, and blacklisting
-- **Protected Routes**: Authentication-required pages in frontend
-
-### Recipe Ownership & Privacy
-- **Recipe Ownership**: Recipes belong to users, owners can edit/delete
-- **Private Recipes**: Toggle recipes between public and private visibility
-- **My Recipes**: Personal collection of user's recipes
-- **Favorites System**: Save and organize favorite recipes
-- **Authorization**: Owner-based permissions for update/delete operations
-
 ### Core Features
 - Two-pane layout: recipe list and detailed view
 - Add new recipes with a Material Design 3 modal
 - Recipe fields: name, description, category, prep time, cook time, difficulty, and dynamic ingredient list
-- Delete recipes (owner only)
+- Delete recipes
 - Material Design 3 UI components from Material-UI v6
 
-### Search & Filtering
+### Search & Filtering (New)
 - **Search by name**: Real-time search for recipes by name
 - **Advanced filters** (collapsible panel):
   - Filter by difficulty level (easy, medium, hard)
@@ -40,12 +25,10 @@ A full-stack recipe management application with a React frontend, Django REST AP
 
 ## Tech Stack
 
-- **Frontend**: React 18 with Material-UI v6 (Material Design 3), React Router v6
+- **Frontend**: React 18 with Material-UI v6 (Material Design 3)
 - **Backend**: Django 4.2 with Django REST Framework
-- **Authentication**: djangorestframework-simplejwt (JWT tokens)
 - **Database**: PostgreSQL 15
 - **Containerization**: Docker and Docker Compose
-- **Testing**: pytest (backend), React Testing Library (frontend), Playwright (E2E)
 
 ## Getting Started
 
@@ -104,25 +87,12 @@ Follow the prompts to create your admin account.
 
 ## API Endpoints
 
-### Authentication Endpoints
-- `POST /api/auth/register/` - Register new user (public)
-- `POST /api/auth/login/` - Login and receive JWT tokens (public)
-- `POST /api/auth/logout/` - Logout and blacklist refresh token (requires auth)
-- `POST /api/auth/token/refresh/` - Refresh access token (public, requires refresh token)
-- `GET /api/auth/user/` - Get current user info (requires auth)
-- `GET /api/auth/profile/` - Get user profile (requires auth)
-- `PUT/PATCH /api/auth/profile/` - Update user profile (requires auth)
-
 ### Recipe Management
-- `GET /api/recipes/` - List all public recipes (+ user's private recipes if authenticated)
-- `POST /api/recipes/` - Create a new recipe (requires auth, auto-assigns owner)
-- `GET /api/recipes/{id}/` - Get a specific recipe (private recipes require ownership)
-- `PUT /api/recipes/{id}/` - Update a recipe (requires ownership)
-- `DELETE /api/recipes/{id}/` - Delete a recipe (requires ownership)
-- `GET /api/recipes/my_recipes/` - Get current user's recipes (requires auth)
-- `GET /api/recipes/favorites/` - Get user's favorited recipes (requires auth)
-- `POST /api/recipes/{id}/favorite/` - Favorite a recipe (requires auth)
-- `DELETE /api/recipes/{id}/unfavorite/` - Unfavorite a recipe (requires auth)
+- `GET /api/recipes/` - List all recipes
+- `POST /api/recipes/` - Create a new recipe
+- `GET /api/recipes/{id}/` - Get a specific recipe
+- `PUT /api/recipes/{id}/` - Update a recipe
+- `DELETE /api/recipes/{id}/` - Delete a recipe
 
 ### Search & Filtering Query Parameters
 All filters can be combined on the `GET /api/recipes/` endpoint:
@@ -141,15 +111,9 @@ All filters can be combined on the `GET /api/recipes/` endpoint:
 
 This project includes comprehensive test suites across all layers:
 
-- **Backend**: 124 pytest tests with 93.78% coverage
+- **Backend**: 124 pytest tests with 98.7% coverage
 - **Frontend**: 160 React Testing Library tests with 78.7% coverage (1 skipped test - see notes)
 - **E2E**: 29 Playwright tests covering complete user workflows
-
-All backend tests passing (124/124 ✅), including:
-- Authentication and authorization tests
-- Recipe ownership and privacy tests
-- User profile and favorites tests
-- API endpoint tests with permissions
 
 ### Quick Start
 ```bash
@@ -165,10 +129,7 @@ cd frontend && npm test -- --watchAll=false
 
 For detailed testing information, see:
 - [TEST_QUICK_START.md](./TEST_QUICK_START.md) - Quick reference guide
-- [TESTING.md](./TESTING.md) - Comprehensive testing documentation
-- [TEST_SUITE_SUMMARY.md](./TEST_SUITE_SUMMARY.md) - Test suite overview
-- [FINAL_TEST_RESULTS.md](./FINAL_TEST_RESULTS.md) - Latest test results (124/124 passing)
-- [e2e/README.md](./e2e/README.md) - E2E testing with Playwright
+- [TESTING.md](./TESTING.md) - Comprehensive testing documentation (Backend, Frontend, E2E)
 
 ## Development
 
@@ -183,26 +144,21 @@ The application uses volume mounting for hot-reloading during development:
 **Important**: When adding new features or tests, please update the relevant documentation files.
 
 A comprehensive documentation update system is in place:
-- See [DOCUMENTATION_MAINTENANCE.md](./DOCUMENTATION_MAINTENANCE.md) for detailed guidelines
-- See [DOCUMENTATION_UPDATE_SYSTEM.md](./DOCUMENTATION_UPDATE_SYSTEM.md) for system overview
+- See [DOCUMENTATION_MAINTENANCE.md](./DOCUMENTATION_MAINTENANCE.md) for detailed guidelines and system overview
 - Use [.github/FEATURE_CHECKLIST.md](./.github/FEATURE_CHECKLIST.md) as a template when adding features
 
 ### Available Documentation
 
 **Core Documentation:**
 - [README.md](./README.md) - This file, project overview
-- [TESTING.md](./TESTING.md) - Comprehensive testing guide
+- [TESTING.md](./TESTING.md) - Comprehensive testing guide (Backend, Frontend, E2E)
 - [TEST_QUICK_START.md](./TEST_QUICK_START.md) - Quick testing reference
-- [TEST_SUITE_SUMMARY.md](./TEST_SUITE_SUMMARY.md) - Test suite summary
-
-**Authentication Documentation:**
-- [AUTHENTICATION_IMPLEMENTATION.md](./AUTHENTICATION_IMPLEMENTATION.md) - Authentication system technical guide
-- [QUICKSTART.md](./QUICKSTART.md) - Quick start guide for authentication features
-- [FINAL_TEST_RESULTS.md](./FINAL_TEST_RESULTS.md) - Complete test results (124/124 passing)
-- [COMPREHENSIVE_PROJECT_SUMMARY.md](./COMPREHENSIVE_PROJECT_SUMMARY.md) - Complete project summary
 
 **Maintenance & Contributing:**
-- [DOCUMENTATION_MAINTENANCE.md](./DOCUMENTATION_MAINTENANCE.md) - Guidelines for updating docs
-- [DOCUMENTATION_UPDATE_SYSTEM.md](./DOCUMENTATION_UPDATE_SYSTEM.md) - System overview
+- [DOCUMENTATION_MAINTENANCE.md](./DOCUMENTATION_MAINTENANCE.md) - Guidelines for updating docs and system overview
 - [.github/FEATURE_CHECKLIST.md](./.github/FEATURE_CHECKLIST.md) - Feature addition checklist template
 - [.github/DOCUMENTATION_TEMPLATE.md](./.github/DOCUMENTATION_TEMPLATE.md) - Template for new documentation files
+
+**Testing Best Practices:**
+- [backend/TEST_IMPROVEMENTS.md](./backend/TEST_IMPROVEMENTS.md) - Pytest improvements and patterns
+- [frontend/TEST_IMPROVEMENTS.md](./frontend/TEST_IMPROVEMENTS.md) - React Testing Library improvements and patterns
