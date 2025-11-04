@@ -41,6 +41,16 @@ Current E2E test coverage includes:
 - ✅ Error handling
 - ✅ Accessibility checks
 - ✅ Responsive design (mobile viewport)
+- ✅ Search and filtering workflows
+- ✅ Advanced filter combinations
+
+**Note**: Authentication E2E tests recommended as future enhancement:
+- User registration flow
+- Login/logout workflows
+- Protected route access
+- My Recipes page interactions
+- Favorite/unfavorite recipes
+- Privacy toggle functionality
 
 ---
 

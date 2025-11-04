@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
   ThemeProvider,
   createTheme,
@@ -8,11 +9,22 @@ import {
   Toolbar,
   Typography,
   Fab,
+  Button,
+  IconButton,
+  Menu,
+  MenuItem,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import AccountCircle from '@mui/icons-material/AccountCircle';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import RecipeList from './components/RecipeList';
 import RecipeDetail from './components/RecipeDetail';
 import AddRecipeModal from './components/AddRecipeModal';
+import Login from './components/Login';
+import Register from './components/Register';
+import MyRecipes from './components/MyRecipes';
+import ProtectedRoute from './components/ProtectedRoute';
+import apiService from './services/api';
 
 const theme = createTheme({
   palette: {
@@ -29,7 +41,9 @@ const theme = createTheme({
   },
 });
 
-function App() {
+function RecipeApp() {
+  const { isAuthenticated, user, logout } = useAuth();
+  const navigate = useNavigate();
   const [recipes, setRecipes] = useState([]);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -42,6 +56,7 @@ function App() {
     excludeIngredients: '',
     dietaryTags: [],
   });
+  const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
     fetchRecipes();
@@ -49,33 +64,31 @@ function App() {
 
   const fetchRecipes = async () => {
     try {
-      const params = new URLSearchParams();
+      const params = {};
 
       if (searchText) {
-        params.append('search', searchText);
+        params.search = searchText;
       }
       if (filters.difficulty) {
-        params.append('difficulty', filters.difficulty);
+        params.difficulty = filters.difficulty;
       }
       if (filters.maxPrepTime) {
-        params.append('max_prep_time', filters.maxPrepTime);
+        params.max_prep_time = filters.maxPrepTime;
       }
       if (filters.maxCookTime) {
-        params.append('max_cook_time', filters.maxCookTime);
+        params.max_cook_time = filters.maxCookTime;
       }
       if (filters.includeIngredients) {
-        params.append('include_ingredients', filters.includeIngredients);
+        params.include_ingredients = filters.includeIngredients;
       }
       if (filters.excludeIngredients) {
-        params.append('exclude_ingredients', filters.excludeIngredients);
+        params.exclude_ingredients = filters.excludeIngredients;
       }
       if (filters.dietaryTags.length > 0) {
-        params.append('dietary_tags', filters.dietaryTags.join(','));
+        params.dietary_tags = filters.dietaryTags.join(',');
       }
 
-      const url = `http://localhost:8000/api/recipes/${params.toString() ? '?' + params.toString() : ''}`;
-      const response = await fetch(url);
-      const data = await response.json();
+      const data = await apiService.getRecipes(params);
       setRecipes(data);
       if (data.length > 0 && !selectedRecipe) {
         setSelectedRecipe(data[0]);
@@ -89,79 +102,176 @@ function App() {
 
   const handleAddRecipe = async (newRecipe) => {
     try {
-      const response = await fetch('http://localhost:8000/api/recipes/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newRecipe),
-      });
-      const data = await response.json();
+      const data = await apiService.createRecipe(newRecipe);
       setRecipes([data, ...recipes]);
       setSelectedRecipe(data);
       setModalOpen(false);
     } catch (error) {
       console.error('Error adding recipe:', error);
+      alert('Failed to add recipe. Please try again.');
     }
   };
 
   const handleDeleteRecipe = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this recipe?')) {
+      return;
+    }
+
     try {
-      await fetch(`http://localhost:8000/api/recipes/${id}/`, {
-        method: 'DELETE',
-      });
-      const updatedRecipes = recipes.filter(recipe => recipe.id !== id);
-      setRecipes(updatedRecipes);
+      await apiService.deleteRecipe(id);
+      setRecipes(recipes.filter((recipe) => recipe.id !== id));
       if (selectedRecipe?.id === id) {
-        setSelectedRecipe(updatedRecipes.length > 0 ? updatedRecipes[0] : null);
+        setSelectedRecipe(recipes[0] || null);
       }
     } catch (error) {
       console.error('Error deleting recipe:', error);
+      alert('Failed to delete recipe. Please try again.');
     }
   };
 
+  const handleSelectRecipe = (recipe) => {
+    setSelectedRecipe(recipe);
+  };
+
+  const handleSearchChange = (searchValue) => {
+    setSearchText(searchValue);
+  };
+
+  const handleFiltersChange = (newFilters) => {
+    setFilters(newFilters);
+  };
+
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    handleMenuClose();
+    navigate('/login');
+  };
+
+  const handleMyRecipes = () => {
+    handleMenuClose();
+    navigate('/my-recipes');
+  };
+
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-        <AppBar position="static" elevation={0}>
-          <Toolbar>
-            <Typography variant="h6" component="div">
-              My Recipe Book
-            </Typography>
-          </Toolbar>
-        </AppBar>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+      <AppBar position="static">
+        <Toolbar>
+          <Typography
+            variant="h6"
+            component={RouterLink}
+            to="/"
+            sx={{ flexGrow: 1, textDecoration: 'none', color: 'inherit' }}
+          >
+            Recipe App
+          </Typography>
 
-        <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-          <RecipeList
-            recipes={recipes}
-            selectedRecipe={selectedRecipe}
-            onSelectRecipe={setSelectedRecipe}
-            onSearch={setSearchText}
-            onFilterChange={setFilters}
-          />
-          <RecipeDetail
-            recipe={selectedRecipe}
-            onDelete={handleDeleteRecipe}
-          />
-        </Box>
+          {isAuthenticated ? (
+            <>
+              <IconButton color="inherit" onClick={handleMenuOpen}>
+                <AccountCircle />
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+              >
+                <MenuItem disabled>
+                  <Typography variant="body2">{user?.username}</Typography>
+                </MenuItem>
+                <MenuItem onClick={handleMyRecipes}>My Recipes</MenuItem>
+                <MenuItem onClick={handleLogout}>Logout</MenuItem>
+              </Menu>
+            </>
+          ) : (
+            <>
+              <Button color="inherit" component={RouterLink} to="/login">
+                Login
+              </Button>
+              <Button color="inherit" component={RouterLink} to="/register">
+                Sign Up
+              </Button>
+            </>
+          )}
+        </Toolbar>
+      </AppBar>
 
-        <Fab
-          color="primary"
-          aria-label="add"
-          sx={{ position: 'fixed', bottom: 16, right: 16 }}
-          onClick={() => setModalOpen(true)}
-        >
-          <AddIcon />
-        </Fab>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+              <RecipeList
+                recipes={recipes}
+                selectedRecipe={selectedRecipe}
+                onSelectRecipe={handleSelectRecipe}
+                searchText={searchText}
+                onSearchChange={handleSearchChange}
+                filters={filters}
+                onFiltersChange={handleFiltersChange}
+              />
+              <RecipeDetail
+                recipe={selectedRecipe}
+                onDelete={handleDeleteRecipe}
+              />
 
-        <AddRecipeModal
-          open={modalOpen}
-          onClose={() => setModalOpen(false)}
-          onAdd={handleAddRecipe}
+              {isAuthenticated && (
+                <Fab
+                  color="primary"
+                  aria-label="add"
+                  sx={{ position: 'fixed', bottom: 16, right: 16 }}
+                  onClick={() => setModalOpen(true)}
+                >
+                  <AddIcon />
+                </Fab>
+              )}
+
+              <AddRecipeModal
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
+                onAdd={handleAddRecipe}
+              />
+            </Box>
+          }
         />
-      </Box>
-    </ThemeProvider>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route
+          path="/my-recipes"
+          element={
+            <ProtectedRoute>
+              <MyRecipes
+                onSelectRecipe={(recipe) => {
+                  setSelectedRecipe(recipe);
+                  navigate('/');
+                }}
+              />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Box>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <AuthProvider>
+          <RecipeApp />
+        </AuthProvider>
+      </ThemeProvider>
+    </Router>
   );
 }
 
