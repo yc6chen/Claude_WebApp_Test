@@ -54,6 +54,15 @@ frontend/TEST_IMPROVEMENTS.md (Frontend best practices)
 - **TESTING.md** - Comprehensive testing documentation (Backend, Frontend, E2E)
 - **TEST_QUICK_START.md** - Quick reference for running tests
 - **DOCUMENTATION_MAINTENANCE.md** - This file
+- **E2E_TESTING.md** - End-to-end testing with Playwright
+
+### Authentication Documentation
+- **AUTHENTICATION_IMPLEMENTATION.md** - Complete authentication system technical guide
+- **QUICKSTART.md** - Quick start guide for authentication features
+- **FINAL_TEST_RESULTS.md** - Latest test results (124/124 passing)
+- **COMPREHENSIVE_PROJECT_SUMMARY.md** - Complete project summary
+- **IMPLEMENTATION_SUMMARY.md** - High-level implementation overview
+- **TEST_RESULTS.md** - Initial test results documentation
 
 ### Backend Documentation
 - **backend/TEST_IMPROVEMENTS.md** - Pytest best practices and improvements
@@ -379,6 +388,12 @@ If you're unsure whether documentation needs updating:
 
 ---
 
-**Last Updated**: 2025-10-28
+**Last Updated**: 2025-11-03 (Added authentication documentation)
 **Maintainer**: Development Team
 **Review Frequency**: With every feature/test addition
+
+**Recent Updates:**
+- 2025-11-03: Added authentication system documentation files
+- 2025-11-03: Updated all test counts to 124 backend tests (100% passing)
+- 2025-11-03: Updated coverage to 93.78% backend
+- 2025-10-28: Initial documentation system created

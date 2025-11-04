@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -10,11 +10,48 @@ import {
   ListItemText,
   IconButton,
   Divider,
+  Tooltip,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import LockIcon from '@mui/icons-material/Lock';
+import PublicIcon from '@mui/icons-material/Public';
+import { useAuth } from '../contexts/AuthContext';
+import apiService from '../services/api';
 
-const RecipeDetail = ({ recipe, onDelete }) => {
+const RecipeDetail = ({ recipe, onDelete, onFavoriteChange }) => {
+  const { isAuthenticated, user } = useAuth();
+  const [isFavorited, setIsFavorited] = useState(recipe?.is_favorited || false);
+  const [favoritesCount, setFavoritesCount] = useState(recipe?.favorites_count || 0);
+
+  // Check if current user owns this recipe
+  const isOwner = isAuthenticated && user && recipe?.owner === user.id;
+
+  const handleFavoriteToggle = async () => {
+    if (!isAuthenticated) {
+      alert('Please login to favorite recipes');
+      return;
+    }
+
+    try {
+      if (isFavorited) {
+        await apiService.unfavoriteRecipe(recipe.id);
+        setIsFavorited(false);
+        setFavoritesCount(prev => Math.max(0, prev - 1));
+      } else {
+        await apiService.favoriteRecipe(recipe.id);
+        setIsFavorited(true);
+        setFavoritesCount(prev => prev + 1);
+      }
+      if (onFavoriteChange) {
+        onFavoriteChange(recipe.id, !isFavorited);
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    }
+  };
   if (!recipe) {
     return (
       <Box
@@ -44,17 +81,56 @@ const RecipeDetail = ({ recipe, onDelete }) => {
     >
       <Box sx={{ maxWidth: 800, margin: '0 auto' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            {recipe.name}
-          </Typography>
-          <IconButton
-            aria-label="delete"
-            onClick={() => onDelete(recipe.id)}
-            color="error"
-          >
-            <DeleteIcon />
-          </IconButton>
+          <Box sx={{ flex: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="h4" component="h1">
+                {recipe.name}
+              </Typography>
+              {recipe.is_private ? (
+                <Tooltip title="Private recipe">
+                  <LockIcon color="action" />
+                </Tooltip>
+              ) : (
+                <Tooltip title="Public recipe">
+                  <PublicIcon color="action" />
+                </Tooltip>
+              )}
+            </Box>
+            {recipe.owner_username && (
+              <Typography variant="body2" color="text.secondary">
+                By {recipe.owner_username}
+              </Typography>
+            )}
+          </Box>
+          <Box>
+            {isAuthenticated && (
+              <Tooltip title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}>
+                <IconButton
+                  aria-label="favorite"
+                  onClick={handleFavoriteToggle}
+                  color="secondary"
+                >
+                  {isFavorited ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+                </IconButton>
+              </Tooltip>
+            )}
+            {isOwner && (
+              <IconButton
+                aria-label="delete"
+                onClick={() => onDelete(recipe.id)}
+                color="error"
+              >
+                <DeleteIcon />
+              </IconButton>
+            )}
+          </Box>
         </Box>
+
+        {favoritesCount > 0 && (
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            {favoritesCount} {favoritesCount === 1 ? 'person has' : 'people have'} favorited this recipe
+          </Typography>
+        )}
 
         <Box sx={{ display: 'flex', gap: 1, mb: 3, flexWrap: 'wrap' }}>
           <Chip

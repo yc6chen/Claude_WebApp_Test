@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
@@ -36,6 +37,23 @@ class Recipe(models.Model):
         ('halal', 'Halal'),
         ('kosher', 'Kosher'),
     ]
+
+    # Owner field - links recipe to user
+    owner = models.ForeignKey(
+        User,
+        related_name='recipes',
+        on_delete=models.CASCADE,
+        null=True,  # Allow existing recipes without owner
+        blank=True,
+        help_text="Recipe owner"
+    )
+
+    # Privacy control
+    is_private = models.BooleanField(
+        default=False,
+        db_index=True,
+        help_text="If True, only the owner can view this recipe"
+    )
 
     # Core fields with constraints
     name = models.CharField(
@@ -101,6 +119,10 @@ class Recipe(models.Model):
             models.Index(fields=['category', '-created_at'], name='recipe_category_created_idx'),
             models.Index(fields=['-created_at', 'difficulty'], name='recipe_created_diff_idx'),
             models.Index(fields=['name', 'difficulty'], name='recipe_name_diff_idx'),
+            # Index for owner queries
+            models.Index(fields=['owner', '-created_at'], name='recipe_owner_created_idx'),
+            # Index for privacy filtering
+            models.Index(fields=['is_private', 'owner'], name='recipe_privacy_owner_idx'),
         ]
         # Database-level constraints
         constraints = [
@@ -188,3 +210,85 @@ class Ingredient(models.Model):
 
     def __str__(self):
         return f"{self.measurement} {self.name}"
+
+
+class UserProfile(models.Model):
+    """
+    Extended user profile with additional information.
+    One-to-one relationship with Django's built-in User model.
+    """
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='profile',
+        help_text="Associated user account"
+    )
+
+    bio = models.TextField(
+        blank=True,
+        max_length=500,
+        help_text="User biography"
+    )
+
+    avatar = models.URLField(
+        blank=True,
+        help_text="URL to user's avatar image"
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        help_text="Profile creation timestamp"
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        help_text="Profile last update timestamp"
+    )
+
+    class Meta:
+        verbose_name = "User Profile"
+        verbose_name_plural = "User Profiles"
+        db_table = "recipes_userprofile"
+
+    def __str__(self):
+        return f"Profile for {self.user.username}"
+
+
+class Favorite(models.Model):
+    """
+    Favorite model to track user's favorite recipes.
+    Many-to-many relationship between User and Recipe through this model.
+    """
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='favorites',
+        help_text="User who favorited the recipe"
+    )
+
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='favorited_by',
+        help_text="Favorited recipe"
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        db_index=True,
+        help_text="When the recipe was favorited"
+    )
+
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ['user', 'recipe']  # Prevent duplicate favorites
+        indexes = [
+            models.Index(fields=['user', '-created_at'], name='favorite_user_created_idx'),
+            models.Index(fields=['recipe', '-created_at'], name='favorite_recipe_created_idx'),
+        ]
+        verbose_name = "Favorite"
+        verbose_name_plural = "Favorites"
+        db_table = "recipes_favorite"
+
+    def __str__(self):
+        return f"{self.user.username} favorites {self.recipe.name}"

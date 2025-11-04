@@ -8,7 +8,8 @@ This module provides reusable fixtures following pytest best practices:
 """
 import pytest
 from rest_framework.test import APIClient
-from recipes.models import Recipe, Ingredient
+from django.contrib.auth.models import User
+from recipes.models import Recipe, Ingredient, UserProfile
 
 
 # ============================================================================
@@ -23,6 +24,69 @@ def api_client():
     Scope: function (default) - new client for each test for isolation.
     """
     return APIClient()
+
+
+# ============================================================================
+# User and Authentication Fixtures
+# ============================================================================
+
+@pytest.fixture
+def user_factory(db):
+    """
+    Factory fixture for creating User instances.
+
+    Usage:
+        def test_example(user_factory):
+            user = user_factory(username='testuser')
+    """
+    def _create_user(**kwargs):
+        """Create a User instance with sensible defaults."""
+        defaults = {
+            'username': 'testuser',
+            'email': 'test@example.com',
+            'first_name': 'Test',
+            'last_name': 'User',
+        }
+        defaults.update(kwargs)
+        password = defaults.pop('password', 'testpass123')
+        user = User.objects.create_user(**defaults)
+        user.set_password(password)
+        user.save()
+
+        # Create profile if it doesn't exist
+        UserProfile.objects.get_or_create(user=user)
+
+        return user
+    return _create_user
+
+
+@pytest.fixture
+def test_user(user_factory):
+    """
+    Convenience fixture for a single test user.
+    """
+    return user_factory()
+
+
+@pytest.fixture
+def authenticated_client(api_client, test_user):
+    """
+    Fixture to provide an authenticated API client.
+
+    Usage:
+        def test_example(authenticated_client):
+            response = authenticated_client.get('/api/recipes/')
+    """
+    api_client.force_authenticate(user=test_user)
+    return api_client
+
+
+@pytest.fixture
+def other_user(user_factory):
+    """
+    Fixture for a second user for testing authorization.
+    """
+    return user_factory(username='otheruser', email='other@example.com')
 
 
 # ============================================================================
