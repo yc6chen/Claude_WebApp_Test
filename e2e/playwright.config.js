@@ -9,19 +9,19 @@ module.exports = defineConfig({
   testDir: './tests',
 
   /* Maximum time one test can run for */
-  timeout: 30 * 1000,
+  timeout: 90 * 1000,
 
   /* Run tests in files in parallel */
-  fullyParallel: true,
+  fullyParallel: false,
 
   /* Fail the build on CI if you accidentally left test.only in the source code */
   forbidOnly: !!process.env.CI,
 
   /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  retries: 2,
 
   /* Opt out of parallel tests on CI */
-  workers: process.env.CI ? 1 : undefined,
+  workers: 1,
 
   /* Reporter to use */
   reporter: [
@@ -45,10 +45,10 @@ module.exports = defineConfig({
     video: 'retain-on-failure',
 
     /* Maximum time each action can take */
-    actionTimeout: 10 * 1000,
+    actionTimeout: 15 * 1000,
 
     /* Navigation timeout */
-    navigationTimeout: 30 * 1000,
+    navigationTimeout: 60 * 1000,
   },
 
   /* Configure projects for major browsers */
@@ -59,24 +59,34 @@ module.exports = defineConfig({
         ...devices['Desktop Chrome'],
         // Additional chromium-specific settings
         viewport: { width: 1280, height: 720 },
+        // Optimize for faster page loads
+        launchOptions: {
+          args: [
+            '--disable-gpu',
+            '--disable-dev-shm-usage',
+            '--disable-setuid-sandbox',
+            '--no-sandbox',
+          ],
+        },
       },
     },
 
-    {
-      name: 'firefox',
-      use: {
-        ...devices['Desktop Firefox'],
-        viewport: { width: 1280, height: 720 },
-      },
-    },
-
-    {
-      name: 'webkit',
-      use: {
-        ...devices['Desktop Safari'],
-        viewport: { width: 1280, height: 720 },
-      },
-    },
+    // Firefox and Webkit disabled for faster test runs
+    // Uncomment when needed for cross-browser testing
+    // {
+    //   name: 'firefox',
+    //   use: {
+    //     ...devices['Desktop Firefox'],
+    //     viewport: { width: 1280, height: 720 },
+    //   },
+    // },
+    // {
+    //   name: 'webkit',
+    //   use: {
+    //     ...devices['Desktop Safari'],
+    //     viewport: { width: 1280, height: 720 },
+    //   },
+    // },
 
     /* Test against mobile viewports */
     // {

@@ -292,3 +292,269 @@ class Favorite(models.Model):
 
     def __str__(self):
         return f"{self.user.username} favorites {self.recipe.name}"
+
+
+class MealPlan(models.Model):
+    """
+    MealPlan model stores user's planned meals for specific dates and meal types.
+    Supports multiple recipes per day and meal type.
+    """
+    MEAL_TYPE_CHOICES = [
+        ('breakfast', 'Breakfast'),
+        ('lunch', 'Lunch'),
+        ('dinner', 'Dinner'),
+    ]
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='meal_plans',
+        db_index=True,
+        help_text="User who created this meal plan"
+    )
+
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='meal_plans',
+        null=True,
+        blank=True,
+        help_text="Recipe assigned to this meal slot (null for empty slot)"
+    )
+
+    date = models.DateField(
+        db_index=True,
+        help_text="Date for this meal"
+    )
+
+    meal_type = models.CharField(
+        max_length=10,
+        choices=MEAL_TYPE_CHOICES,
+        db_index=True,
+        help_text="Type of meal (breakfast, lunch, dinner)"
+    )
+
+    order = models.PositiveIntegerField(
+        default=0,
+        validators=[MinValueValidator(0)],
+        help_text="Order when multiple recipes are assigned to same meal"
+    )
+
+    notes = models.TextField(
+        blank=True,
+        max_length=500,
+        help_text="Optional notes for this meal"
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        help_text="When this meal plan entry was created"
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        help_text="When this meal plan entry was last updated"
+    )
+
+    class Meta:
+        ordering = ['date', 'meal_type', 'order']
+        indexes = [
+            models.Index(fields=['user', 'date'], name='mealplan_user_date_idx'),
+            models.Index(fields=['user', 'date', 'meal_type'], name='mealplan_user_date_meal_idx'),
+            models.Index(fields=['date', 'meal_type', 'order'], name='mealplan_date_meal_order_idx'),
+        ]
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(meal_type__in=['breakfast', 'lunch', 'dinner']),
+                name='mealplan_meal_type_valid'
+            ),
+            models.CheckConstraint(
+                check=models.Q(order__gte=0),
+                name='mealplan_order_positive'
+            ),
+        ]
+        verbose_name = "Meal Plan"
+        verbose_name_plural = "Meal Plans"
+        db_table = "recipes_mealplan"
+
+    def __str__(self):
+        recipe_name = self.recipe.name if self.recipe else "Empty"
+        return f"{self.user.username} - {self.date} {self.meal_type}: {recipe_name}"
+
+
+class ShoppingList(models.Model):
+    """
+    ShoppingList model represents a shopping list generated from meal plans.
+    One shopping list can consolidate items from multiple meal plans.
+    """
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='shopping_lists',
+        db_index=True,
+        help_text="User who owns this shopping list"
+    )
+
+    name = models.CharField(
+        max_length=200,
+        help_text="Name of the shopping list (e.g., 'Week of Jan 1-7')"
+    )
+
+    start_date = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Start date of meal plan period"
+    )
+
+    end_date = models.DateField(
+        null=True,
+        blank=True,
+        help_text="End date of meal plan period"
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        db_index=True,
+        help_text="Whether this shopping list is currently active"
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        db_index=True,
+        help_text="When this shopping list was created"
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        help_text="When this shopping list was last updated"
+    )
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', '-created_at'], name='shoppinglist_user_created_idx'),
+            models.Index(fields=['user', 'is_active'], name='shoppinglist_user_active_idx'),
+        ]
+        verbose_name = "Shopping List"
+        verbose_name_plural = "Shopping Lists"
+        db_table = "recipes_shoppinglist"
+
+    def __str__(self):
+        return f"{self.user.username} - {self.name}"
+
+
+class ShoppingListItem(models.Model):
+    """
+    ShoppingListItem model stores individual items in a shopping list.
+    Items can be aggregated from multiple recipes or added manually.
+    """
+    CATEGORY_CHOICES = [
+        ('produce', 'Produce'),
+        ('dairy', 'Dairy & Eggs'),
+        ('meat', 'Meat & Seafood'),
+        ('bakery', 'Bakery'),
+        ('pantry', 'Pantry'),
+        ('canned', 'Canned Goods'),
+        ('frozen', 'Frozen'),
+        ('beverages', 'Beverages'),
+        ('condiments', 'Condiments & Sauces'),
+        ('spices', 'Spices & Seasonings'),
+        ('snacks', 'Snacks'),
+        ('other', 'Other'),
+    ]
+
+    shopping_list = models.ForeignKey(
+        ShoppingList,
+        on_delete=models.CASCADE,
+        related_name='items',
+        db_index=True,
+        help_text="Shopping list this item belongs to"
+    )
+
+    ingredient_name = models.CharField(
+        max_length=200,
+        db_index=True,
+        help_text="Name of the ingredient"
+    )
+
+    quantity = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+        help_text="Quantity of the ingredient"
+    )
+
+    unit = models.CharField(
+        max_length=50,
+        help_text="Unit of measurement (e.g., 'cups', 'lbs', 'oz', 'grams')"
+    )
+
+    category = models.CharField(
+        max_length=20,
+        choices=CATEGORY_CHOICES,
+        default='other',
+        db_index=True,
+        help_text="Category for organizing shopping list"
+    )
+
+    is_checked = models.BooleanField(
+        default=False,
+        help_text="Whether this item has been checked off the list"
+    )
+
+    source_recipes = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="List of recipe IDs that contributed to this item"
+    )
+
+    is_custom = models.BooleanField(
+        default=False,
+        help_text="True if manually added, False if from recipes"
+    )
+
+    notes = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Optional notes for this item"
+    )
+
+    order = models.PositiveIntegerField(
+        default=0,
+        validators=[MinValueValidator(0)],
+        help_text="Display order within category"
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        help_text="When this item was added"
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        help_text="When this item was last updated"
+    )
+
+    class Meta:
+        ordering = ['category', 'order', 'ingredient_name']
+        indexes = [
+            models.Index(fields=['shopping_list', 'category'], name='shopitem_list_category_idx'),
+            models.Index(fields=['shopping_list', 'is_checked'], name='shopitem_list_checked_idx'),
+            models.Index(fields=['category', 'order'], name='shopitem_cat_order_idx'),
+        ]
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(quantity__gte=0),
+                name='shoppingitem_quantity_positive'
+            ),
+            models.CheckConstraint(
+                check=models.Q(order__gte=0),
+                name='shoppingitem_order_positive'
+            ),
+        ]
+        verbose_name = "Shopping List Item"
+        verbose_name_plural = "Shopping List Items"
+        db_table = "recipes_shoppinglistitem"
+
+    def __str__(self):
+        return f"{self.quantity} {self.unit} {self.ingredient_name}"

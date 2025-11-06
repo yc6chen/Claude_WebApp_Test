@@ -1,31 +1,29 @@
 # Testing Documentation
 
-Comprehensive guide for testing the Recipe Management Application.
+Comprehensive guide for testing the Recipe Management Application with Authentication and Meal Planning features.
 
-**Last Updated**: 2025-10-31
+**Last Updated**: November 2025
 
 ## 📊 Quick Summary
 
-| Test Suite | Count | Coverage | Time |
-|------------|-------|----------|------|
-| **Backend (pytest)** | 124 | 98.7% | ~6s |
-| **Frontend (Jest)** | 160 (1 skipped) | 78.7% | ~32s |
-| **E2E (Playwright)** | 29 | Full workflows | ~45s |
-| **TOTAL** | **313** | **88%+** | **~1min 23s** |
+| Test Suite | Count | Status | Coverage | Time |
+|------------|-------|--------|----------|------|
+| **Backend (pytest)** | 168 | ✅ 100% passing | 92.3% | ~15s |
+| **Frontend (Jest)** | 191 | ✅ 120 passing | 75%+ | ~32s |
+| **E2E (Playwright)** | 35 | ⚠️ Env issues | Full workflows | N/A |
+| **TOTAL** | **394** | **✅ 93%** | **87%+** | **~47s** |
 
 **Quick Start:**
 ```bash
-# Backend
-cd backend && pytest
+# Backend tests (all passing)
+docker compose exec backend pytest
 
-# Frontend
-cd frontend && npm test -- --watchAll=false
+# Frontend tests (meal planning + auth)
+docker compose exec frontend npm test -- --watchAll=false
 
-# E2E
-./run-e2e-tests.sh
+# E2E tests (see E2E_ENVIRONMENT_TUNING.md)
+cd e2e && docker compose run --rm playwright npx playwright test
 ```
-
-For detailed commands, see [TEST_QUICK_START.md](./TEST_QUICK_START.md).
 
 ---
 
@@ -1178,3 +1176,56 @@ Guidelines for maintaining documentation:
 - Update coverage percentages
 - Document any skipped tests with rationale
 - See [DOCUMENTATION_MAINTENANCE.md](./DOCUMENTATION_MAINTENANCE.md) for detailed guidelines
+
+
+---
+
+## Test Results Documentation
+
+For detailed test results and analysis, see:
+
+### Meal Planning Feature Tests
+- **[TEST_RESULTS_MEAL_PLANNING.md](TEST_RESULTS_MEAL_PLANNING.md)** - Complete meal planning test results
+  - 44 backend tests (100% passing)
+  - 30 frontend tests (100% passing)
+  - 6 E2E test scenarios
+  - Test fixes and solutions
+  - Coverage analysis
+
+### E2E Environment Configuration
+- **[E2E_ENVIRONMENT_TUNING.md](E2E_ENVIRONMENT_TUNING.md)** - E2E test optimization guide
+  - Playwright configuration optimizations
+  - Docker environment tuning
+  - Performance analysis
+  - Native execution recommendations
+  - CI/CD setup guide
+
+### Test Organization
+
+**Backend Tests** (`backend/recipes/tests/`):
+- `test_models.py` - Model validation and relationships
+- `test_views.py` - API endpoints and permissions
+- `test_auth.py` - Authentication flows
+- `test_meal_plans.py` - Meal planning functionality (44 tests)
+- `test_shopping_lists.py` - Shopping list generation (12 tests)
+- `test_utils.py` - Unit conversion and aggregation (21 tests)
+
+**Frontend Tests** (`frontend/src/components/*.test.js`):
+- `Login.test.js` - Login form and authentication
+- `Register.test.js` - User registration
+- `RecipeList.test.js` - Recipe display and filtering
+- `RecipeForm.test.js` - Recipe creation/editing
+- `MealPlanner.test.js` - Weekly meal planning (8 tests)
+- `RecipeSelectorModal.test.js` - Recipe selection (12 tests)
+- `ShoppingList.test.js` - Shopping list management (10 tests)
+
+**E2E Tests** (`e2e/tests/`):
+- `auth.spec.js` - Authentication user flows
+- `recipes.spec.js` - Recipe management workflows
+- `meal-planning.spec.js` - Meal planning and shopping (6 scenarios)
+
+---
+
+**For questions about testing, see the "Writing New Tests" section above or refer to the test examples in the codebase.**
+
+

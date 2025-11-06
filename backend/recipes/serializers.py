@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
-from .models import Recipe, Ingredient, UserProfile, Favorite
+from .models import Recipe, Ingredient, UserProfile, Favorite, MealPlan, ShoppingList, ShoppingListItem
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -146,3 +146,113 @@ class FavoriteSerializer(serializers.ModelSerializer):
         model = Favorite
         fields = ['id', 'recipe', 'recipe_details', 'created_at']
         read_only_fields = ['created_at']
+
+
+class MealPlanSerializer(serializers.ModelSerializer):
+    recipe_details = RecipeSerializer(source='recipe', read_only=True)
+    meal_type_display = serializers.CharField(source='get_meal_type_display', read_only=True)
+
+    class Meta:
+        model = MealPlan
+        fields = ['id', 'user', 'recipe', 'recipe_details', 'date', 'meal_type',
+                  'meal_type_display', 'order', 'notes', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at', 'user']
+
+    def create(self, validated_data):
+        # Set user to the current user
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            validated_data['user'] = request.user
+        return super().create(validated_data)
+
+
+class MealPlanBulkSerializer(serializers.Serializer):
+    """Serializer for bulk operations on meal plans"""
+    action = serializers.ChoiceField(choices=['clear', 'copy', 'repeat'])
+    start_date = serializers.DateField()
+    end_date = serializers.DateField(required=False)
+    target_start_date = serializers.DateField(required=False)
+
+    def validate(self, attrs):
+        action = attrs.get('action')
+
+        if action in ['copy', 'repeat'] and not attrs.get('target_start_date'):
+            raise serializers.ValidationError({
+                'target_start_date': 'This field is required for copy and repeat actions.'
+            })
+
+        if action == 'clear' and not attrs.get('end_date'):
+            # For clear action, end_date defaults to start_date
+            attrs['end_date'] = attrs['start_date']
+
+        if attrs.get('end_date') and attrs['start_date'] > attrs['end_date']:
+            raise serializers.ValidationError({
+                'end_date': 'End date must be after or equal to start date.'
+            })
+
+        return attrs
+
+
+class ShoppingListItemSerializer(serializers.ModelSerializer):
+    category_display = serializers.CharField(source='get_category_display', read_only=True)
+
+    class Meta:
+        model = ShoppingListItem
+        fields = ['id', 'shopping_list', 'ingredient_name', 'quantity', 'unit',
+                  'category', 'category_display', 'is_checked', 'source_recipes',
+                  'is_custom', 'notes', 'order', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class ShoppingListSerializer(serializers.ModelSerializer):
+    items = ShoppingListItemSerializer(many=True, read_only=True)
+    total_items = serializers.SerializerMethodField()
+    checked_items = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ShoppingList
+        fields = ['id', 'user', 'name', 'start_date', 'end_date', 'is_active',
+                  'items', 'total_items', 'checked_items', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at', 'user']
+
+    def get_total_items(self, obj):
+        """Get total number of items in the shopping list"""
+        return obj.items.count()
+
+    def get_checked_items(self, obj):
+        """Get number of checked items in the shopping list"""
+        return obj.items.filter(is_checked=True).count()
+
+    def create(self, validated_data):
+        # Set user to the current user
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            validated_data['user'] = request.user
+        return super().create(validated_data)
+
+
+class ShoppingListGenerateSerializer(serializers.Serializer):
+    """Serializer for generating a shopping list from meal plans"""
+    start_date = serializers.DateField()
+    end_date = serializers.DateField()
+    name = serializers.CharField(max_length=200, required=False)
+    include_custom_items = serializers.BooleanField(default=False)
+    custom_items = serializers.ListField(
+        child=serializers.DictField(),
+        required=False,
+        default=list
+    )
+
+    def validate(self, attrs):
+        if attrs['start_date'] > attrs['end_date']:
+            raise serializers.ValidationError({
+                'end_date': 'End date must be after or equal to start date.'
+            })
+
+        # Auto-generate name if not provided
+        if not attrs.get('name'):
+            start = attrs['start_date'].strftime('%b %d')
+            end = attrs['end_date'].strftime('%b %d, %Y')
+            attrs['name'] = f"Shopping List: {start} - {end}"
+
+        return attrs

@@ -277,6 +277,139 @@ class ApiService {
   async unfavoriteRecipe(id) {
     return this.delete(`/recipes/${id}/unfavorite/`);
   }
+
+  // Meal Plan endpoints
+  async getMealPlans(filters = {}) {
+    const queryParams = new URLSearchParams(filters).toString();
+    const endpoint = `/meal-plans/${queryParams ? `?${queryParams}` : ''}`;
+    const response = await this.get(endpoint);
+    return response.json();
+  }
+
+  async getMealPlanWeek(startDate) {
+    const endpoint = `/meal-plans/week/${startDate ? `?start_date=${startDate}` : ''}`;
+    const response = await this.get(endpoint);
+    return response.json();
+  }
+
+  async getMealPlan(id) {
+    const response = await this.get(`/meal-plans/${id}/`);
+    return response.json();
+  }
+
+  async createMealPlan(data) {
+    const response = await this.post('/meal-plans/', data);
+    return response.json();
+  }
+
+  async updateMealPlan(id, data) {
+    const response = await this.put(`/meal-plans/${id}/`, data);
+    return response.json();
+  }
+
+  async deleteMealPlan(id) {
+    return this.delete(`/meal-plans/${id}/`);
+  }
+
+  async bulkMealPlanOperation(data) {
+    const response = await this.post('/meal-plans/bulk_operation/', data);
+    return response.json();
+  }
+
+  async clearMealPlans(startDate, endDate) {
+    return this.bulkMealPlanOperation({
+      action: 'clear',
+      start_date: startDate,
+      end_date: endDate
+    });
+  }
+
+  async copyMealPlans(startDate, endDate, targetStartDate) {
+    return this.bulkMealPlanOperation({
+      action: 'copy',
+      start_date: startDate,
+      end_date: endDate,
+      target_start_date: targetStartDate
+    });
+  }
+
+  async repeatMealPlans(startDate, endDate, targetStartDate) {
+    return this.bulkMealPlanOperation({
+      action: 'repeat',
+      start_date: startDate,
+      end_date: endDate,
+      target_start_date: targetStartDate
+    });
+  }
+
+  // Shopping List endpoints
+  async getShoppingLists(filters = {}) {
+    const queryParams = new URLSearchParams(filters).toString();
+    const endpoint = `/shopping-lists/${queryParams ? `?${queryParams}` : ''}`;
+    const response = await this.get(endpoint);
+    return response.json();
+  }
+
+  async getShoppingList(id) {
+    const response = await this.get(`/shopping-lists/${id}/`);
+    return response.json();
+  }
+
+  async createShoppingList(data) {
+    const response = await this.post('/shopping-lists/', data);
+    return response.json();
+  }
+
+  async updateShoppingList(id, data) {
+    const response = await this.patch(`/shopping-lists/${id}/`, data);
+    return response.json();
+  }
+
+  async deleteShoppingList(id) {
+    return this.delete(`/shopping-lists/${id}/`);
+  }
+
+  async generateShoppingList(data) {
+    const response = await this.post('/shopping-lists/generate/', data);
+    return response.json();
+  }
+
+  async addItemToShoppingList(shoppingListId, itemData) {
+    const response = await this.post(`/shopping-lists/${shoppingListId}/add_item/`, itemData);
+    return response.json();
+  }
+
+  async clearCheckedItems(shoppingListId) {
+    const response = await this.post(`/shopping-lists/${shoppingListId}/clear_checked/`);
+    return response.json();
+  }
+
+  // Shopping List Item endpoints
+  async getShoppingListItems(filters = {}) {
+    const queryParams = new URLSearchParams(filters).toString();
+    const endpoint = `/shopping-list-items/${queryParams ? `?${queryParams}` : ''}`;
+    const response = await this.get(endpoint);
+    return response.json();
+  }
+
+  async getShoppingListItem(id) {
+    const response = await this.get(`/shopping-list-items/${id}/`);
+    return response.json();
+  }
+
+  async updateShoppingListItem(id, data) {
+    const response = await this.patch(`/shopping-list-items/${id}/`, data);
+    return response.json();
+  }
+
+  async deleteShoppingListItem(id) {
+    return this.delete(`/shopping-list-items/${id}/`);
+  }
+
+  async toggleShoppingListItemCheck(id) {
+    const response = await this.post(`/shopping-list-items/${id}/toggle_check/`);
+    return response.json();
+  }
 }
 
 // Export a singleton instance
