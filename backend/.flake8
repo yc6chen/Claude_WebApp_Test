@@ -1,0 +1,73 @@
+[flake8]
+# Maximum line length
+max-line-length = 127
+
+# Maximum complexity
+max-complexity = 10
+
+# Exclude directories from linting
+exclude =
+    .git,
+    __pycache__,
+    */migrations/*,
+    */static/*,
+    */media/*,
+    venv,
+    env,
+    .venv,
+    */node_modules/*,
+    .pytest_cache,
+    .coverage
+
+# Ignore specific error codes
+ignore =
+    # W503: line break before binary operator (conflicts with PEP 8)
+    W503,
+    # E203: whitespace before ':' (conflicts with black)
+    E203,
+    # D100: Missing docstring in public module (too strict for small modules)
+    D100,
+    # D101: Missing docstring in public class (we have some)
+    D101,
+    # D102: Missing docstring in public method (too strict)
+    D102,
+    # D103: Missing docstring in public function (too strict)
+    D103,
+    # D104: Missing docstring in public package
+    D104,
+    # D105: Missing docstring in magic method
+    D105,
+    # D107: Missing docstring in __init__
+    D107
+
+# Select error codes to check
+select =
+    # Pyflakes errors
+    F,
+    # Pycodestyle errors
+    E,
+    # Pycodestyle warnings
+    W,
+    # McCabe complexity
+    C90
+
+# Per-file ignores
+per-file-ignores =
+    # Imported but unused in __init__ files
+    __init__.py:F401,
+    # Settings files can be long
+    settings.py:E501,
+    # Test files can have many imports
+    test_*.py:E501,F401
+
+# Show source code for errors
+show-source = True
+
+# Show error codes in output
+show-pep8 = True
+
+# Count errors
+count = True
+
+# Display statistics
+statistics = True
