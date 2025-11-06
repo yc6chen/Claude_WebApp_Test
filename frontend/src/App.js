@@ -23,6 +23,8 @@ import AddRecipeModal from './components/AddRecipeModal';
 import Login from './components/Login';
 import Register from './components/Register';
 import MyRecipes from './components/MyRecipes';
+import MealPlanner from './components/MealPlanner';
+import ShoppingList from './components/ShoppingList';
 import ProtectedRoute from './components/ProtectedRoute';
 import apiService from './services/api';
 
@@ -160,6 +162,16 @@ function RecipeApp() {
     navigate('/my-recipes');
   };
 
+  const handleMealPlanner = () => {
+    handleMenuClose();
+    navigate('/meal-planner');
+  };
+
+  const handleShoppingLists = () => {
+    handleMenuClose();
+    navigate('/shopping-lists');
+  };
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <AppBar position="static">
@@ -187,6 +199,7 @@ function RecipeApp() {
                   <Typography variant="body2">{user?.username}</Typography>
                 </MenuItem>
                 <MenuItem onClick={handleMyRecipes}>My Recipes</MenuItem>
+                <MenuItem onClick={handleMealPlanner}>Meal Planner</MenuItem>
                 <MenuItem onClick={handleLogout}>Logout</MenuItem>
               </Menu>
             </>
@@ -253,6 +266,22 @@ function RecipeApp() {
                   navigate('/');
                 }}
               />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/meal-planner"
+          element={
+            <ProtectedRoute>
+              <MealPlanner />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/shopping-lists/:id"
+          element={
+            <ProtectedRoute>
+              <ShoppingList />
             </ProtectedRoute>
           }
         />

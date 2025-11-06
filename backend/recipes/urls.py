@@ -3,12 +3,16 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .views import (
     RecipeViewSet, FavoriteViewSet, RegisterView, LogoutView,
-    CurrentUserView, UserProfileView
+    CurrentUserView, UserProfileView, MealPlanViewSet,
+    ShoppingListViewSet, ShoppingListItemViewSet
 )
 
 router = DefaultRouter()
 router.register(r'recipes', RecipeViewSet, basename='recipe')
 router.register(r'favorites', FavoriteViewSet, basename='favorite')
+router.register(r'meal-plans', MealPlanViewSet, basename='meal-plan')
+router.register(r'shopping-lists', ShoppingListViewSet, basename='shopping-list')
+router.register(r'shopping-list-items', ShoppingListItemViewSet, basename='shopping-list-item')
 
 urlpatterns = [
     # Authentication endpoints
@@ -19,6 +23,6 @@ urlpatterns = [
     path('auth/user/', CurrentUserView.as_view(), name='current_user'),
     path('auth/profile/', UserProfileView.as_view(), name='user_profile'),
 
-    # Recipe and favorites routes
+    # Recipe, favorites, meal plans, and shopping lists routes
     path('', include(router.urls)),
 ]

@@ -1,164 +1,257 @@
 # Personal Recipe Database App
 
-A full-stack recipe management application with a React frontend, Django REST API backend, and PostgreSQL database, all containerized with Docker.
+A full-stack recipe management application with secure authentication, meal planning, and shopping list generation. Built with React, Django REST API, and PostgreSQL, all containerized with Docker.
 
 ## Features
 
-### Core Features
-- Two-pane layout: recipe list and detailed view
-- Add new recipes with a Material Design 3 modal
-- Recipe fields: name, description, category, prep time, cook time, difficulty, and dynamic ingredient list
-- Delete recipes
-- Material Design 3 UI components from Material-UI v6
+### 🔐 User Authentication & Accounts
+- JWT-based secure authentication
+- User registration and login
+- Password reset functionality
+- Private recipes (visible only to owner)
+- Public recipes (shareable with all users)
+- Personal recipe collections
 
-### Search & Filtering (New)
-- **Search by name**: Real-time search for recipes by name
-- **Advanced filters** (collapsible panel):
-  - Filter by difficulty level (easy, medium, hard)
-  - Filter by maximum prep time
-  - Filter by maximum cook time
-  - Include specific ingredients (e.g., "recipes with chicken")
-  - Exclude specific ingredients (e.g., "recipes without mushrooms")
-  - Filter by dietary tags (vegan, gluten-free, etc.)
-- **Combine multiple filters**: All filters work simultaneously
-- **Dietary tags**: Add dietary information to recipes (vegan, vegetarian, gluten-free, dairy-free, nut-free, low-carb, keto, paleo, halal, kosher)
+### 📖 Recipe Management
+- Create, edit, and delete recipes
+- Recipe fields: name, description, category, prep/cook time, difficulty, ingredients, instructions
+- Dynamic ingredient list with measurements
+- Dietary tags (vegan, vegetarian, gluten-free, dairy-free, nut-free, low-carb, keto, paleo, halal, kosher)
+- Public/private visibility control
+- Recipe favorites system
+
+### 🔍 Search & Filtering
+- Real-time search by recipe name
+- Advanced filtering:
+  - By difficulty level (easy, medium, hard)
+  - By maximum prep/cook time
+  - By included ingredients (e.g., "with chicken")
+  - By excluded ingredients (e.g., "without mushrooms")
+  - By dietary tags
+  - By author (your recipes, favorites)
+- Combine multiple filters simultaneously
+
+### 📅 Meal Planning
+- Weekly calendar view (Sunday-Saturday)
+- Drag-and-drop recipe assignment to meal slots
+- Support for multiple recipes per meal
+- Breakfast, lunch, and dinner slots
+- Week navigation and "Today" quick view
+- Bulk operations (copy week, clear week, repeat meals)
+
+### 🛒 Shopping List Generation
+- Auto-generate from meal plan
+- Intelligent ingredient aggregation
+- Smart unit conversion (cups ↔ tbsp, lbs ↔ oz, etc.)
+- Categorized by grocery department
+- Check off items as you shop
+- Progress tracking
+- Add custom items
+- Print and CSV export
+
+### 🎨 User Interface
+- Material Design 3 components (Material-UI v6)
+- Responsive design for desktop and mobile
+- Two-pane layout for easy browsing
+- Dark mode support
+- Intuitive navigation
 
 ## Tech Stack
 
-- **Frontend**: React 18 with Material-UI v6 (Material Design 3)
-- **Backend**: Django 4.2 with Django REST Framework
+- **Frontend**: React 18 + Material-UI v6
+- **Backend**: Django 4.2 + Django REST Framework
+- **Authentication**: JWT (djangorestframework-simplejwt)
 - **Database**: PostgreSQL 15
-- **Containerization**: Docker and Docker Compose
+- **Containerization**: Docker + Docker Compose
+- **Testing**: Jest, React Testing Library, pytest, Playwright
 
-## Getting Started
+## Quick Start
 
 ### Prerequisites
+- Docker Desktop
+- Git
 
-- Docker
-- Docker Compose
+### Installation
 
-### Running the Application
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd TestWebApp
+   ```
 
-1. Start all services:
-```bash
-docker-compose up --build
-```
+2. **Start all services**
+   ```bash
+   docker compose up --build
+   ```
 
-2. Access the application:
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8000/api/recipes/
-   - Django Admin: http://localhost:8000/admin/
+3. **Access the application**
+   - **Frontend**: http://localhost:3000
+   - **Backend API**: http://localhost:8000/api/
+   - **Django Admin**: http://localhost:8000/admin/
 
-3. To stop the application:
-```bash
-docker-compose down
-```
+4. **Create a superuser** (optional, for admin access)
+   ```bash
+   docker compose exec backend python manage.py createsuperuser
+   ```
 
-### Creating a Django Admin User (Optional)
+### First Steps
 
-To access the Django admin panel:
-
-```bash
-docker-compose exec backend python manage.py createsuperuser
-```
-
-Follow the prompts to create your admin account.
+1. **Register an account** at http://localhost:3000/register
+2. **Log in** with your credentials
+3. **Create your first recipe** using the "Add Recipe" button
+4. **Plan your week** by navigating to Meal Planner from the user menu
+5. **Generate a shopping list** from your meal plan
 
 ## Project Structure
 
 ```
-.
-├── backend/
-│   ├── recipe_project/       # Django project settings
-│   ├── recipes/              # Recipes app
-│   ├── Dockerfile
-│   ├── requirements.txt
-│   └── manage.py
-├── frontend/
-│   ├── public/
+TestWebApp/
+├── backend/              # Django REST API
+│   ├── backend/         # Django project settings
+│   ├── recipes/         # Main app (models, views, serializers)
+│   └── requirements.txt # Python dependencies
+├── frontend/            # React application
 │   ├── src/
-│   │   ├── components/       # React components
-│   │   ├── App.js
-│   │   └── index.js
-│   ├── Dockerfile
-│   └── package.json
-└── docker-compose.yml
+│   │   ├── components/  # React components
+│   │   ├── services/    # API client
+│   │   └── App.js      # Main app component
+│   └── package.json    # Node dependencies
+├── e2e/                # End-to-end tests (Playwright)
+├── docker-compose.yml  # Docker orchestration
+└── README.md          # This file
 ```
-
-## API Endpoints
-
-### Recipe Management
-- `GET /api/recipes/` - List all recipes
-- `POST /api/recipes/` - Create a new recipe
-- `GET /api/recipes/{id}/` - Get a specific recipe
-- `PUT /api/recipes/{id}/` - Update a recipe
-- `DELETE /api/recipes/{id}/` - Delete a recipe
-
-### Search & Filtering Query Parameters
-All filters can be combined on the `GET /api/recipes/` endpoint:
-
-- `?search=name` - Search recipes by name (case-insensitive)
-- `?difficulty=easy` - Filter by difficulty (easy, medium, hard)
-- `?max_prep_time=30` - Filter by maximum prep time in minutes
-- `?max_cook_time=45` - Filter by maximum cook time in minutes
-- `?include_ingredients=chicken,rice` - Include recipes with all specified ingredients (comma-separated)
-- `?exclude_ingredients=mushrooms,nuts` - Exclude recipes with any specified ingredients (comma-separated)
-- `?dietary_tags=vegan,gluten_free` - Filter recipes with all specified dietary tags (comma-separated)
-
-**Example**: `/api/recipes/?search=chicken&difficulty=easy&max_prep_time=30&dietary_tags=gluten_free`
-
-## Testing
-
-This project includes comprehensive test suites across all layers:
-
-- **Backend**: 124 pytest tests with 98.7% coverage
-- **Frontend**: 160 React Testing Library tests with 78.7% coverage (1 skipped test - see notes)
-- **E2E**: 29 Playwright tests covering complete user workflows
-
-### Quick Start
-```bash
-# Backend tests
-cd backend && pytest --cov=recipes
-
-# Frontend tests
-cd frontend && npm test -- --watchAll=false
-
-# E2E tests (Playwright in Docker)
-./run-e2e-tests.sh
-```
-
-For detailed testing information, see:
-- [TEST_QUICK_START.md](./TEST_QUICK_START.md) - Quick reference guide
-- [TESTING.md](./TESTING.md) - Comprehensive testing documentation (Backend, Frontend, E2E)
 
 ## Development
 
-The application uses volume mounting for hot-reloading during development:
-- Frontend changes will automatically reload
-- Backend changes will automatically reload the Django development server
+### Running Tests
 
-## Documentation
+**Backend Tests:**
+```bash
+# All tests
+docker compose exec backend pytest
 
-### For Contributors
+# With coverage
+docker compose exec backend pytest --cov=recipes --cov-report=html
 
-**Important**: When adding new features or tests, please update the relevant documentation files.
+# Specific test file
+docker compose exec backend pytest recipes/tests/test_meal_plans.py
+```
 
-A comprehensive documentation update system is in place:
-- See [DOCUMENTATION_MAINTENANCE.md](./DOCUMENTATION_MAINTENANCE.md) for detailed guidelines and system overview
-- Use [.github/FEATURE_CHECKLIST.md](./.github/FEATURE_CHECKLIST.md) as a template when adding features
+**Frontend Tests:**
+```bash
+# All tests
+docker compose exec frontend npm test
 
-### Available Documentation
+# With coverage
+docker compose exec frontend npm test -- --coverage
 
-**Core Documentation:**
-- [README.md](./README.md) - This file, project overview
-- [TESTING.md](./TESTING.md) - Comprehensive testing guide (Backend, Frontend, E2E)
-- [TEST_QUICK_START.md](./TEST_QUICK_START.md) - Quick testing reference
+# Specific test file
+docker compose exec frontend npm test -- MealPlanner.test.js
+```
 
-**Maintenance & Contributing:**
-- [DOCUMENTATION_MAINTENANCE.md](./DOCUMENTATION_MAINTENANCE.md) - Guidelines for updating docs and system overview
-- [.github/FEATURE_CHECKLIST.md](./.github/FEATURE_CHECKLIST.md) - Feature addition checklist template
-- [.github/DOCUMENTATION_TEMPLATE.md](./.github/DOCUMENTATION_TEMPLATE.md) - Template for new documentation files
+**E2E Tests:**
+```bash
+cd e2e
+docker compose run --rm playwright npx playwright test
+```
 
-**Testing Best Practices:**
-- [backend/TEST_IMPROVEMENTS.md](./backend/TEST_IMPROVEMENTS.md) - Pytest improvements and patterns
-- [frontend/TEST_IMPROVEMENTS.md](./frontend/TEST_IMPROVEMENTS.md) - React Testing Library improvements and patterns
+See [TESTING.md](TESTING.md) for comprehensive testing documentation.
+
+### API Documentation
+
+The API is RESTful and follows standard conventions:
+
+**Authentication Endpoints:**
+- `POST /api/auth/register/` - Register new user
+- `POST /api/auth/login/` - Login (get JWT tokens)
+- `POST /api/auth/refresh/` - Refresh access token
+- `POST /api/auth/password-reset/` - Request password reset
+- `POST /api/auth/password-reset-confirm/` - Confirm password reset
+
+**Recipe Endpoints:**
+- `GET /api/recipes/` - List all accessible recipes
+- `POST /api/recipes/` - Create new recipe
+- `GET /api/recipes/{id}/` - Get recipe details
+- `PUT /api/recipes/{id}/` - Update recipe
+- `DELETE /api/recipes/{id}/` - Delete recipe
+- `POST /api/recipes/{id}/favorite/` - Toggle favorite
+- `GET /api/recipes/my_recipes/` - Get user's recipes
+- `GET /api/recipes/favorites/` - Get favorited recipes
+
+**Meal Planning Endpoints:**
+- `GET /api/meal-plans/` - List meal plans
+- `POST /api/meal-plans/` - Create meal plan
+- `GET /api/meal-plans/week/` - Get week view
+- `POST /api/meal-plans/bulk_operation/` - Bulk operations
+
+**Shopping List Endpoints:**
+- `GET /api/shopping-lists/` - List shopping lists
+- `POST /api/shopping-lists/generate/` - Generate from meal plan
+- `POST /api/shopping-lists/{id}/add_item/` - Add custom item
+- `POST /api/shopping-list-items/{id}/toggle_check/` - Check/uncheck item
+
+## Features Documentation
+
+For detailed feature documentation, see:
+- **[FEATURES.md](FEATURES.md)** - Comprehensive feature implementation details
+- **[TESTING.md](TESTING.md)** - Testing strategies and results
+- **[DOCUMENTATION_MAINTENANCE.md](DOCUMENTATION_MAINTENANCE.md)** - How to maintain docs
+
+## Database Schema
+
+### Key Models
+
+**User** (Django built-in)
+- username, email, password
+- Authentication and authorization
+
+**Recipe**
+- name, description, category
+- prep_time, cook_time, difficulty
+- is_public (visibility control)
+- author (ForeignKey to User)
+- ingredients (related Ingredient model)
+- dietary_tags (JSONField)
+
+**MealPlan**
+- user, recipe, date, meal_type
+- Tracks what recipes are planned for specific meals
+
+**ShoppingList & ShoppingListItem**
+- Generated from meal plans
+- Aggregated ingredients with unit conversion
+- Categorized by grocery department
+
+See [FEATURES.md](FEATURES.md) for complete schema details.
+
+## Contributing
+
+1. Create a feature branch
+2. Make your changes
+3. Write/update tests
+4. Update documentation
+5. Submit a pull request
+
+## Test Coverage
+
+- **Backend**: 92% coverage (168 tests)
+- **Frontend**: ~75% coverage (191 tests)
+- **E2E**: 6 comprehensive workflows
+
+**Total**: 365+ tests across all layers
+
+## License
+
+This project is for educational purposes.
+
+## Support
+
+For issues, questions, or contributions:
+1. Check existing documentation in `/docs` or markdown files
+2. Review [TESTING.md](TESTING.md) for test-related issues
+3. Check [FEATURES.md](FEATURES.md) for feature details
+4. Open an issue with detailed description
+
+---
+
+**Last Updated**: November 2025

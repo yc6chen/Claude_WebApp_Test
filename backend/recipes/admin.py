@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Recipe, Ingredient, UserProfile, Favorite
+from .models import Recipe, Ingredient, UserProfile, Favorite, MealPlan, ShoppingList, ShoppingListItem
 
 
 class IngredientInline(admin.TabularInline):
@@ -46,3 +46,73 @@ class FavoriteAdmin(admin.ModelAdmin):
     list_filter = ['created_at']
     search_fields = ['user__username', 'recipe__name']
     readonly_fields = ['created_at']
+
+
+@admin.register(MealPlan)
+class MealPlanAdmin(admin.ModelAdmin):
+    list_display = ['user', 'date', 'meal_type', 'recipe', 'order', 'created_at']
+    list_filter = ['date', 'meal_type', 'created_at']
+    search_fields = ['user__username', 'recipe__name']
+    readonly_fields = ['created_at', 'updated_at']
+    fieldsets = (
+        (None, {
+            'fields': ('user', 'date', 'meal_type', 'recipe')
+        }),
+        ('Details', {
+            'fields': ('order', 'notes')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+class ShoppingListItemInline(admin.TabularInline):
+    model = ShoppingListItem
+    extra = 0
+    fields = ['ingredient_name', 'quantity', 'unit', 'category', 'is_checked', 'is_custom']
+
+
+@admin.register(ShoppingList)
+class ShoppingListAdmin(admin.ModelAdmin):
+    list_display = ['user', 'name', 'start_date', 'end_date', 'is_active', 'created_at']
+    list_filter = ['is_active', 'created_at']
+    search_fields = ['user__username', 'name']
+    readonly_fields = ['created_at', 'updated_at']
+    inlines = [ShoppingListItemInline]
+    fieldsets = (
+        (None, {
+            'fields': ('user', 'name', 'is_active')
+        }),
+        ('Date Range', {
+            'fields': ('start_date', 'end_date')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+@admin.register(ShoppingListItem)
+class ShoppingListItemAdmin(admin.ModelAdmin):
+    list_display = ['shopping_list', 'ingredient_name', 'quantity', 'unit', 'category', 'is_checked', 'is_custom']
+    list_filter = ['category', 'is_checked', 'is_custom']
+    search_fields = ['ingredient_name', 'shopping_list__name']
+    readonly_fields = ['created_at', 'updated_at']
+    fieldsets = (
+        (None, {
+            'fields': ('shopping_list', 'ingredient_name', 'quantity', 'unit', 'category')
+        }),
+        ('Status', {
+            'fields': ('is_checked', 'is_custom', 'notes')
+        }),
+        ('Metadata', {
+            'fields': ('source_recipes', 'order')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )

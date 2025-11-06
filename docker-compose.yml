@@ -46,6 +46,10 @@ services:
     environment:
       - REACT_APP_API_URL=http://localhost:8000
       - WATCHPACK_POLLING=true
+      - FAST_REFRESH=false
+      - TSC_COMPILE_ON_ERROR=true
+      - DISABLE_ESLINT_PLUGIN=true
+      - GENERATE_SOURCEMAP=false
     depends_on:
       - backend
     stdin_open: true
