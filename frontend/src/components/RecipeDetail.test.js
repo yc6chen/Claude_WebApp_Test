@@ -14,17 +14,20 @@ import React from 'react';
 import { render, screen } from '../test-utils';
 import userEvent from '@testing-library/user-event';
 import RecipeDetail from './RecipeDetail';
-import * as AuthContext from '../contexts/AuthContext';
 
-// Mock useAuth to return a logged-in user
-jest.spyOn(AuthContext, 'useAuth').mockReturnValue({
-  user: { id: 1, username: 'testuser' },
-  isAuthenticated: true,
-  loading: false,
-  login: jest.fn(),
-  register: jest.fn(),
-  logout: jest.fn(),
-});
+// Mock the AuthContext module before importing the component
+jest.mock('../contexts/AuthContext', () => ({
+  ...jest.requireActual('../contexts/AuthContext'),
+  useAuth: () => ({
+    user: { id: 1, username: 'testuser' },
+    isAuthenticated: true,
+    loading: false,
+    login: jest.fn(),
+    register: jest.fn(),
+    logout: jest.fn(),
+  }),
+  AuthProvider: ({ children }) => children,
+}));
 
 const mockRecipe = {
   id: 1,
