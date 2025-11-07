@@ -23,7 +23,8 @@ beforeAll(() => {
        args[0].includes('Warning: An update to') ||
        args[0].includes('inside a test was not wrapped in act') ||
        args[0].includes('A component is changing a controlled input') ||
-       args[0].includes('controlled to be uncontrolled'))
+       args[0].includes('controlled to be uncontrolled') ||
+       args[0].includes('MUI: A component is changing the controlled'))
     ) {
       return;
     }
