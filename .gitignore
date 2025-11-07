@@ -94,3 +94,6 @@ Thumbs.db
 *.db
 *.sqlite
 *.sqlite3
+
+# CI/CD temporary files
+CICD_Failures.md
