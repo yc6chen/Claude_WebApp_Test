@@ -290,6 +290,7 @@ describe('App', () => {
         difficulty: 'hard',
         prep_time: 30,
         cook_time: 45,
+        owner: 1,
         dietary_tags: [],
         ingredients: [],
       };
@@ -350,6 +351,7 @@ describe('App', () => {
         difficulty: 'hard',
         prep_time: 30,
         cook_time: 45,
+        owner: 1,
         dietary_tags: [],
         ingredients: [],
       };
@@ -402,6 +404,7 @@ describe('App', () => {
         difficulty: 'hard',
         prep_time: 30,
         cook_time: 45,
+        owner: 1,
         dietary_tags: [],
         ingredients: [],
       };
@@ -451,6 +454,7 @@ describe('App', () => {
         difficulty: 'easy',
         prep_time: 30,
         cook_time: 45,
+        owner: 1,
         dietary_tags: [],
         ingredients: [],
       };
@@ -708,6 +712,7 @@ describe('App', () => {
         difficulty: 'easy',
         prep_time: 5,
         cook_time: 10,
+        owner: 1,
         dietary_tags: [],
         ingredients: [],
       };
