@@ -15,6 +15,20 @@ import { render, screen, waitFor, within } from './test-utils';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 
+// Mock the AuthContext to provide an authenticated user
+jest.mock('./contexts/AuthContext', () => ({
+  ...jest.requireActual('./contexts/AuthContext'),
+  useAuth: () => ({
+    user: { id: 1, username: 'testuser' },
+    isAuthenticated: true,
+    loading: false,
+    login: jest.fn(),
+    register: jest.fn(),
+    logout: jest.fn(),
+  }),
+  AuthProvider: ({ children }) => children,
+}));
+
 const mockRecipes = [
   {
     id: 1,
