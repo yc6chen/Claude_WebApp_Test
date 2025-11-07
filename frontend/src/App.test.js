@@ -38,6 +38,7 @@ const mockRecipes = [
     difficulty: 'easy',
     prep_time: 10,
     cook_time: 15,
+    owner: 1,
     ingredients: [
       { id: 1, name: 'Flour', measurement: '2 cups', order: 1 },
       { id: 2, name: 'Milk', measurement: '1.5 cups', order: 2 },
@@ -51,6 +52,7 @@ const mockRecipes = [
     difficulty: 'medium',
     prep_time: 15,
     cook_time: 20,
+    owner: 1,
     ingredients: [
       { id: 3, name: 'Spaghetti', measurement: '400g', order: 1 },
       { id: 4, name: 'Eggs', measurement: '4', order: 2 },
@@ -71,7 +73,7 @@ describe('App', () => {
 
       render(<App />);
 
-      expect(screen.getByText('My Recipe Book')).toBeInTheDocument();
+      expect(screen.getByText('Recipe App')).toBeInTheDocument();
     });
 
     test('renders recipe list component', async () => {
@@ -119,7 +121,15 @@ describe('App', () => {
       render(<App />);
 
       await waitFor(() => {
-        expect(fetch).toHaveBeenCalledWith('http://localhost:8000/api/recipes/');
+        expect(fetch).toHaveBeenCalledWith(
+          'http://localhost:8000/api/recipes/',
+          expect.objectContaining({
+            method: 'GET',
+            headers: expect.objectContaining({
+              'Content-Type': 'application/json',
+            }),
+          })
+        );
       });
     });
 

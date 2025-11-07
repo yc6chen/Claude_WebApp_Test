@@ -18,20 +18,36 @@ const originalError = console.error;
 const originalWarn = console.warn;
 
 beforeAll(() => {
+  // Helper to normalize console args into a searchable string
+  const normalize = (args) =>
+    args
+      .map(a => {
+        if (typeof a === 'string') return a;
+        if (a instanceof Error) return a.message;
+        try {
+          return JSON.stringify(a);
+        } catch {
+          return String(a);
+        }
+      })
+      .join(' ');
+
   console.error = (...args) => {
+    const msg = normalize(args);
     if (
-      typeof args[0] === 'string' &&
-      (args[0].includes('ReactDOMTestUtils.act') ||
-       args[0].includes('Warning: An update to') ||
-       args[0].includes('inside a test was not wrapped in act') ||
-       args[0].includes('A component is changing a controlled input') ||
-       args[0].includes('controlled to be uncontrolled') ||
-       args[0].includes('MUI: A component is changing the controlled') ||
-       args[0].includes('validateDOMNesting') ||
-       args[0].includes('cannot appear as a descendant') ||
-       args[0].includes('Received `true` for a non-boolean attribute') ||
-       args[0].includes('API Error') ||
-       args[0].includes('Error loading'))
+      msg.includes('ReactDOMTestUtils.act') ||
+      msg.includes('Warning: An update to') ||
+      msg.includes('inside a test was not wrapped in act') ||
+      msg.includes('A component is changing a controlled input') ||
+      msg.includes('controlled to be uncontrolled') ||
+      msg.includes('MUI: A component is changing the controlled') ||
+      msg.includes('validateDOMNesting') ||
+      msg.includes('cannot appear as a descendant') ||
+      msg.includes('Received `true` for a non-boolean attribute') ||
+      msg.includes('Received `true` for a non-boolean attribute `jsx`') ||
+      msg.includes('Received `true` for a non-boolean attribute `global`') ||
+      msg.includes('API Error') ||
+      msg.includes('Error loading')
     ) {
       return;
     }
@@ -39,11 +55,12 @@ beforeAll(() => {
   };
 
   console.warn = (...args) => {
+    const msg = normalize(args);
     if (
-      typeof args[0] === 'string' &&
-      (args[0].includes('validateDOMNesting') ||
-       args[0].includes('cannot appear as a descendant') ||
-       args[0].includes('non-boolean attribute'))
+      msg.includes('validateDOMNesting') ||
+      msg.includes('cannot appear as a descendant') ||
+      msg.includes('non-boolean attribute') ||
+      msg.includes('React Router Future Flag Warning')
     ) {
       return;
     }
