@@ -360,6 +360,7 @@ describe('AddRecipeModal', () => {
         difficulty: 'easy',
         dietary_tags: [],
         ingredients: [],
+        is_private: false,
       });
     });
 
