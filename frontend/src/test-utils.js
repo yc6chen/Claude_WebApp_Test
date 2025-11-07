@@ -10,6 +10,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ThemeProvider, createTheme } from '@mui/material';
+import { AuthProvider } from './contexts/AuthContext';
 
 // Theme used in the app
 const theme = createTheme({
@@ -33,9 +34,11 @@ const theme = createTheme({
  */
 function customRender(ui, options = {}) {
   const Wrapper = ({ children }) => (
-    <ThemeProvider theme={theme}>
-      {children}
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider theme={theme}>
+        {children}
+      </ThemeProvider>
+    </AuthProvider>
   );
 
   return render(ui, { wrapper: Wrapper, ...options });

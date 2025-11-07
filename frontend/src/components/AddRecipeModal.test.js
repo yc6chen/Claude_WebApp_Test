@@ -10,7 +10,7 @@
  * - Modal closing and resetting
  */
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '../test-utils';
 import userEvent from '@testing-library/user-event';
 import AddRecipeModal from './AddRecipeModal';
 
