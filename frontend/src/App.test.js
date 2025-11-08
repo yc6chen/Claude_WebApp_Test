@@ -548,10 +548,15 @@ describe('App', () => {
         expect(pancakesElements.length).toBeGreaterThan(0);
       });
 
+      // Wait for recipe details to render
+      await waitFor(() => {
+        expect(screen.getByText('Fluffy breakfast pancakes')).toBeInTheDocument();
+      });
+
       // Mock DELETE response
       fetch.mockResolvedValueOnce({});
 
-      const deleteButton = screen.getByRole('button', { name: /delete/i });
+      const deleteButton = await screen.findByRole('button', { name: /delete/i });
       await user.click(deleteButton);
 
       await waitFor(() => {
@@ -576,9 +581,14 @@ describe('App', () => {
         expect(screen.getByText('2 recipes')).toBeInTheDocument();
       });
 
+      // Wait for recipe details to render
+      await waitFor(() => {
+        expect(screen.getByText('Fluffy breakfast pancakes')).toBeInTheDocument();
+      });
+
       fetch.mockResolvedValueOnce({});
 
-      const deleteButton = screen.getByRole('button', { name: /delete/i });
+      const deleteButton = await screen.findByRole('button', { name: /delete/i });
       await user.click(deleteButton);
 
       await waitFor(() => {
@@ -601,7 +611,7 @@ describe('App', () => {
 
       fetch.mockResolvedValueOnce({});
 
-      const deleteButton = screen.getByRole('button', { name: /delete/i });
+      const deleteButton = await screen.findByRole('button', { name: /delete/i });
       await user.click(deleteButton);
 
       // Should now show the second recipe's details
@@ -625,9 +635,14 @@ describe('App', () => {
         expect(pancakesElements.length).toBeGreaterThan(0);
       });
 
+      // Wait for recipe details to render
+      await waitFor(() => {
+        expect(screen.getByText('Fluffy breakfast pancakes')).toBeInTheDocument();
+      });
+
       fetch.mockResolvedValueOnce({});
 
-      const deleteButton = screen.getByRole('button', { name: /delete/i });
+      const deleteButton = await screen.findByRole('button', { name: /delete/i });
       await user.click(deleteButton);
 
       await waitFor(() => {
@@ -650,10 +665,15 @@ describe('App', () => {
         expect(pancakesElements.length).toBeGreaterThan(0);
       });
 
+      // Wait for recipe details to render
+      await waitFor(() => {
+        expect(screen.getByText('Fluffy breakfast pancakes')).toBeInTheDocument();
+      });
+
       // Mock error
       fetch.mockRejectedValueOnce(new Error('Delete failed'));
 
-      const deleteButton = screen.getByRole('button', { name: /delete/i });
+      const deleteButton = await screen.findByRole('button', { name: /delete/i });
       await user.click(deleteButton);
 
       await waitFor(() => {
@@ -733,7 +753,7 @@ describe('App', () => {
       // Delete the new recipe
       fetch.mockResolvedValueOnce({});
 
-      const deleteButton = screen.getByRole('button', { name: /delete/i });
+      const deleteButton = await screen.findByRole('button', { name: /delete/i });
       await user.click(deleteButton);
 
       await waitFor(() => {
