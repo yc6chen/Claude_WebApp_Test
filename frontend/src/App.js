@@ -121,9 +121,10 @@ function RecipeApp() {
 
     try {
       await apiService.deleteRecipe(id);
-      setRecipes(recipes.filter((recipe) => recipe.id !== id));
+      const updatedRecipes = recipes.filter((recipe) => recipe.id !== id);
+      setRecipes(updatedRecipes);
       if (selectedRecipe?.id === id) {
-        setSelectedRecipe(recipes[0] || null);
+        setSelectedRecipe(updatedRecipes[0] || null);
       }
     } catch (error) {
       console.error('Error deleting recipe:', error);
