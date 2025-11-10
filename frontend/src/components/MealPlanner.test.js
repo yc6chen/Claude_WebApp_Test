@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '../test-utils';
 import { BrowserRouter } from 'react-router-dom';
 import MealPlanner from './MealPlanner';
 import apiService from '../services/api';
@@ -34,13 +34,14 @@ describe('MealPlanner Component', () => {
     jest.clearAllMocks();
 
     // Mock successful API response
+    // Note: Tests run with current date as Nov 10, 2025, so current week is Nov 9-15
     apiService.getMealPlanWeek.mockResolvedValue({
-      start_date: '2025-11-03',
-      end_date: '2025-11-09',
+      start_date: '2025-11-09',
+      end_date: '2025-11-15',
       meal_plans: [
         {
           id: 1,
-          date: '2025-11-05',
+          date: '2025-11-12',  // Wednesday of current week
           meal_type: 'dinner',
           recipe: 1,
           recipe_details: {
@@ -94,7 +95,7 @@ describe('MealPlanner Component', () => {
   it('creates meal plan when recipe is selected', async () => {
     apiService.createMealPlan.mockResolvedValue({
       id: 2,
-      date: '2025-11-05',
+      date: '2025-11-09',  // Sunday of current week
       meal_type: 'breakfast',
       recipe: 1
     });

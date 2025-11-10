@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '../test-utils';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import ShoppingList from './ShoppingList';
 import apiService from '../services/api';

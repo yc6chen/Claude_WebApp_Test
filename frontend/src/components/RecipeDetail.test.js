@@ -11,9 +11,23 @@
  * - Time display
  */
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen } from '../test-utils';
 import userEvent from '@testing-library/user-event';
 import RecipeDetail from './RecipeDetail';
+
+// Mock the AuthContext module before importing the component
+jest.mock('../contexts/AuthContext', () => ({
+  ...jest.requireActual('../contexts/AuthContext'),
+  useAuth: () => ({
+    user: { id: 1, username: 'testuser' },
+    isAuthenticated: true,
+    loading: false,
+    login: jest.fn(),
+    register: jest.fn(),
+    logout: jest.fn(),
+  }),
+  AuthProvider: ({ children }) => children,
+}));
 
 const mockRecipe = {
   id: 1,
@@ -23,6 +37,7 @@ const mockRecipe = {
   prep_time: 15,
   cook_time: 12,
   difficulty: 'easy',
+  owner: 1,
   ingredients: [
     { id: 1, name: 'All-purpose flour', measurement: '2 cups', order: 1 },
     { id: 2, name: 'Butter', measurement: '1 cup', order: 2 },

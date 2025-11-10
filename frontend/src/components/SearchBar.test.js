@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '../test-utils';
 import userEvent from '@testing-library/user-event';
 import SearchBar from './SearchBar';
 import { ThemeProvider, createTheme } from '@mui/material/styles';

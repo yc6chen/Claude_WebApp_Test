@@ -2,6 +2,18 @@
 
 A full-stack recipe management application with secure authentication, meal planning, and shopping list generation. Built with React, Django REST API, and PostgreSQL, all containerized with Docker.
 
+## Status
+
+![CI/CD Pipeline](https://github.com/yc6chen/TestWebApp/workflows/CI/CD%20Pipeline/badge.svg)
+![Backend Tests](https://img.shields.io/badge/backend%20tests-168%20passed-success)
+![Frontend Tests](https://img.shields.io/badge/frontend%20tests-191%20passed-success)
+![Test Coverage](https://img.shields.io/badge/coverage-93.78%25-brightgreen)
+![Python](https://img.shields.io/badge/python-3.11-blue)
+![React](https://img.shields.io/badge/react-18.2-blue)
+![Django](https://img.shields.io/badge/django-4.2-green)
+![PostgreSQL](https://img.shields.io/badge/postgresql-15-blue)
+![Docker](https://img.shields.io/badge/docker-compose-blue)
+
 ## Features
 
 ### 🔐 User Authentication & Accounts
@@ -156,6 +168,29 @@ docker compose run --rm playwright npx playwright test
 ```
 
 See [TESTING.md](TESTING.md) for comprehensive testing documentation.
+
+### CI/CD Pipeline
+
+This project uses GitHub Actions for continuous integration and deployment. The pipeline automatically runs on every push and pull request.
+
+**Pipeline Jobs:**
+- **Backend Tests**: Runs all 168 pytest tests with PostgreSQL
+- **Backend Linting**: Checks code quality with flake8
+- **Frontend Tests**: Runs all 191 Jest tests with coverage
+- **Frontend Linting**: Checks code quality with ESLint
+- **Docker Build**: Verifies Docker images build successfully
+
+**Linting Locally:**
+```bash
+# Backend linting
+docker compose exec backend flake8
+
+# Frontend linting
+docker compose exec frontend npm run lint
+```
+
+**Coverage Reports:**
+Test coverage reports are automatically uploaded to Codecov on each CI run. The project maintains 93.78% overall test coverage.
 
 ### API Documentation
 

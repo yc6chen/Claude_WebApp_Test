@@ -11,9 +11,25 @@
  * - State management across components
  */
 import React from 'react';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from './test-utils';
 import userEvent from '@testing-library/user-event';
 import App from './App';
+
+// Mock useAuth to provide an authenticated user
+jest.mock('./contexts/AuthContext', () => {
+  const actual = jest.requireActual('./contexts/AuthContext');
+  return {
+    ...actual,
+    useAuth: () => ({
+      user: { id: 1, username: 'testuser' },
+      isAuthenticated: true,
+      loading: false,
+      login: jest.fn(),
+      register: jest.fn(),
+      logout: jest.fn(),
+    }),
+  };
+});
 
 const mockRecipes = [
   {
@@ -24,6 +40,7 @@ const mockRecipes = [
     difficulty: 'easy',
     prep_time: 10,
     cook_time: 15,
+    owner: 1,
     ingredients: [
       { id: 1, name: 'Flour', measurement: '2 cups', order: 1 },
       { id: 2, name: 'Milk', measurement: '1.5 cups', order: 2 },
@@ -37,6 +54,7 @@ const mockRecipes = [
     difficulty: 'medium',
     prep_time: 15,
     cook_time: 20,
+    owner: 1,
     ingredients: [
       { id: 3, name: 'Spaghetti', measurement: '400g', order: 1 },
       { id: 4, name: 'Eggs', measurement: '4', order: 2 },
@@ -57,7 +75,7 @@ describe('App', () => {
 
       render(<App />);
 
-      expect(screen.getByText('My Recipe Book')).toBeInTheDocument();
+      expect(screen.getByText('Recipe App')).toBeInTheDocument();
     });
 
     test('renders recipe list component', async () => {
@@ -105,7 +123,15 @@ describe('App', () => {
       render(<App />);
 
       await waitFor(() => {
-        expect(fetch).toHaveBeenCalledWith('http://localhost:8000/api/recipes/');
+        expect(fetch).toHaveBeenCalledWith(
+          'http://localhost:8000/api/recipes/',
+          expect.objectContaining({
+            method: 'GET',
+            headers: expect.objectContaining({
+              'Content-Type': 'application/json',
+            }),
+          })
+        );
       });
     });
 
@@ -266,6 +292,7 @@ describe('App', () => {
         difficulty: 'hard',
         prep_time: 30,
         cook_time: 45,
+        owner: 1,
         dietary_tags: [],
         ingredients: [],
       };
@@ -326,6 +353,7 @@ describe('App', () => {
         difficulty: 'hard',
         prep_time: 30,
         cook_time: 45,
+        owner: 1,
         dietary_tags: [],
         ingredients: [],
       };
@@ -378,6 +406,7 @@ describe('App', () => {
         difficulty: 'hard',
         prep_time: 30,
         cook_time: 45,
+        owner: 1,
         dietary_tags: [],
         ingredients: [],
       };
@@ -427,6 +456,7 @@ describe('App', () => {
         difficulty: 'easy',
         prep_time: 30,
         cook_time: 45,
+        owner: 1,
         dietary_tags: [],
         ingredients: [],
       };
@@ -520,10 +550,15 @@ describe('App', () => {
         expect(pancakesElements.length).toBeGreaterThan(0);
       });
 
+      // Wait for recipe details to render
+      await waitFor(() => {
+        expect(screen.getByText('Fluffy breakfast pancakes')).toBeInTheDocument();
+      });
+
       // Mock DELETE response
       fetch.mockResolvedValueOnce({});
 
-      const deleteButton = screen.getByRole('button', { name: /delete/i });
+      const deleteButton = await screen.findByRole('button', { name: /delete/i });
       await user.click(deleteButton);
 
       await waitFor(() => {
@@ -548,9 +583,14 @@ describe('App', () => {
         expect(screen.getByText('2 recipes')).toBeInTheDocument();
       });
 
+      // Wait for recipe details to render
+      await waitFor(() => {
+        expect(screen.getByText('Fluffy breakfast pancakes')).toBeInTheDocument();
+      });
+
       fetch.mockResolvedValueOnce({});
 
-      const deleteButton = screen.getByRole('button', { name: /delete/i });
+      const deleteButton = await screen.findByRole('button', { name: /delete/i });
       await user.click(deleteButton);
 
       await waitFor(() => {
@@ -573,7 +613,7 @@ describe('App', () => {
 
       fetch.mockResolvedValueOnce({});
 
-      const deleteButton = screen.getByRole('button', { name: /delete/i });
+      const deleteButton = await screen.findByRole('button', { name: /delete/i });
       await user.click(deleteButton);
 
       // Should now show the second recipe's details
@@ -597,9 +637,14 @@ describe('App', () => {
         expect(pancakesElements.length).toBeGreaterThan(0);
       });
 
+      // Wait for recipe details to render
+      await waitFor(() => {
+        expect(screen.getByText('Fluffy breakfast pancakes')).toBeInTheDocument();
+      });
+
       fetch.mockResolvedValueOnce({});
 
-      const deleteButton = screen.getByRole('button', { name: /delete/i });
+      const deleteButton = await screen.findByRole('button', { name: /delete/i });
       await user.click(deleteButton);
 
       await waitFor(() => {
@@ -622,10 +667,15 @@ describe('App', () => {
         expect(pancakesElements.length).toBeGreaterThan(0);
       });
 
+      // Wait for recipe details to render
+      await waitFor(() => {
+        expect(screen.getByText('Fluffy breakfast pancakes')).toBeInTheDocument();
+      });
+
       // Mock error
       fetch.mockRejectedValueOnce(new Error('Delete failed'));
 
-      const deleteButton = screen.getByRole('button', { name: /delete/i });
+      const deleteButton = await screen.findByRole('button', { name: /delete/i });
       await user.click(deleteButton);
 
       await waitFor(() => {
@@ -684,6 +734,7 @@ describe('App', () => {
         difficulty: 'easy',
         prep_time: 5,
         cook_time: 10,
+        owner: 1,
         dietary_tags: [],
         ingredients: [],
       };
@@ -704,7 +755,7 @@ describe('App', () => {
       // Delete the new recipe
       fetch.mockResolvedValueOnce({});
 
-      const deleteButton = screen.getByRole('button', { name: /delete/i });
+      const deleteButton = await screen.findByRole('button', { name: /delete/i });
       await user.click(deleteButton);
 
       await waitFor(() => {
