@@ -7,9 +7,16 @@ import '@testing-library/jest-dom';
 // Mock window.fetch for API calls
 global.fetch = jest.fn();
 
-// Reset fetch mock before each test
+// Mock window.confirm and window.alert for user interactions
+global.window.confirm = jest.fn(() => true);
+global.window.alert = jest.fn();
+
+// Reset mocks before each test
 beforeEach(() => {
   fetch.mockClear();
+  window.confirm.mockClear();
+  window.confirm.mockReturnValue(true);
+  window.alert.mockClear();
 });
 
 // Suppress specific React warnings that come from testing library internals
